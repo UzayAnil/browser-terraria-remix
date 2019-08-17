@@ -1,0 +1,259 @@
+<!--
+    TODO:
+        1.] Make it so that the player doesnt phase through terrain when going sideways to a block that is higher than the current one.
+        2.] Add trees (make them 1 solid image that can be destroyed for items).
+        3.] Make a debug UI.
+        4.] Add an inventory section.
+-->
+<!DOCTYPE HTML>
+<html lang = 'en'>
+    <head>
+        <meta charset = 'utf-8'/>
+        <title>Terraria Browser Remix</title>
+        <style>
+            @font-face{font-family:__local__pixelsplitter__;src:url('./utils/fonts/pixelsplitter.ttf');}
+            body{font-family:__local__pixelsplitter__;background-color:white;}
+            .daylightAffectedSprite{background-color:black;opacity:1;}
+            .gameBlockSprite{width:20px;height:20px;}
+            .gameCharacterSprite{width:20px;height:40px;}
+            #gamecanvas{background-color:#91f8ff;position:absolute;top:0px;left:0px;width:100%;height:100%;}
+            .hiddenImage{display:none;}
+        </style>
+    </head>
+    <body onkeydown = 'handleKeyDown(event.keyCode);'>
+        <img src = './utils/ingame-images/character-sprite.png' id = 'sprites.charactersprite' class = 'daylightAffectedSprite gameCharacterSprite'/>
+        <img src = './utils/ingame-images/dirt-block.png' id = 'sprites.dirtblocksprite' class = 'daylightAffectedSprite gameBlockSprite'/>
+        <img src = './utils/ingame-images/error-block.png' id = 'sprites.errorblocksprite' class = 'daylightAffectedSprite gameBlockSprite'/>
+        <img src = './utils/ingame-images/grass-block.png' id = 'sprites.grassblocksprite' class = 'daylightAffectedSprite gameBlockSprite'/>
+        <img src = './utils/ingame-images/stone-block.png' id = 'sprites.stoneblocksprite' class = 'daylightAffectedSprite gameBlockSprite'/>
+        <img src = './utils/ingame-images/grass-overlay.png' id = 'sprites.grassoverlaysprite' class = 'daylightAffectedSprite gameBlockSprite'/>
+        <img src = './utils/ingame-images/crosshair.png' id = 'sprites.crosshair'/>
+        <img src = './utils/ingame-images/tree-sprite.png' id = 'sprites.treesprite1' class = 'daylightAffectedSprite'/>
+        <img src = './utils/ingame-images/shrubbery-overlay.png' id = 'sprites.shrubberyoverlaysprite' class = 'daylightAffectedSprite gameBlockSprite'/>
+        <canvas id = 'gamecanvas'><p>Error showing canvas.</p></canvas>
+        <script>
+            console.log('Press the + button to toggle the debug overlay.')
+            function getRandomInt(min, max) {
+                return Math.floor(Math.random() * (max - min + 1) + min);
+            }
+            function getTouchingBlockCoord() {
+                return yCoordinateTouching = Math.floor(gameData['playerData']['position'][1]);
+            }
+            function getIsTouchingBlock() {
+                var isTouchingBlock = false;
+                var yCoordinateTouching = Math.floor(gameData['playerData']['position'][1]);
+                try {
+                    blockData = gameData['terrainData'][Math.floor(gameData['playerData']['position'][0])]['blockData'][yCoordinateTouching];
+                    if (blockData != undefined && blockData['isSolid'] == true) {
+                        isTouchingBlock = true;
+                    }
+                } catch (e) {
+                }
+                return isTouchingBlock;
+            }
+            function handleKeyDown(keyCode) {
+                isTouchingBlock = getIsTouchingBlock();
+                if (keyCode == 68) {
+                    gameData['playerData']['position'][0] += 0.5;
+                } else if (keyCode == 65) {
+                    gameData['playerData']['position'][0] -= 0.5;
+                } else if (keyCode == 87 && isTouchingBlock) {
+                    gameData['playerData']['position'][1] += 2;
+                } else if (keyCode == 189) {
+                    blockSizeInPixels -= 10;
+                } else if (keyCode == 187) {
+                    blockSizeInPixels += 10;
+                }
+            }
+            function generateTerrainChunk(minXCoord, maxXCoord, maxHeight, minHeight, worldXMinBorder, worldXMaxBorder, prevoiusGroundLevel, previousTerrainData) {
+                var groundLevel = prevoiusGroundLevel;
+                for (xCoord = minXCoord;xCoord <= maxXCoord;xCoord++) {
+                    if (!(xCoord in previousTerrainData) && xCoord >= worldXMinBorder && xCoord <= worldXMaxBorder) {
+                        groundLevel = getRandomInt(groundLevel - 1, groundLevel + 1)
+                        rowData = {
+                            'maxHeight':0,
+                            'blockData':{
+                            }
+                        };
+                        rowData['maxHeight'] = parseInt(maxHeight);
+                        for (yCoord = maxHeight;yCoord >= minHeight;yCoord--) {
+                            if (groundLevel > maxHeight) {
+                                groundLevel = maxHeight;
+                            } else if (groundLevel < minHeight) {
+                                groundLevel = minHeight;
+                            }
+                            distanceFromGroundLevel = groundLevel - yCoord;
+                            isSolidBlock = true;
+                            individualBlockData = {
+                                'blockType':'errorblock',
+                                'isSolid':true
+                            }
+                            if (yCoord <= groundLevel) {
+                                if (distanceFromGroundLevel == 0) {
+                                    blockType = 'grassblock';                                
+                                } else if (distanceFromGroundLevel < getRandomInt(2, 5)) {
+                                    blockType = 'dirtblock';
+                                } else {
+                                    blockType = 'stoneblock';
+                                }
+                                individualBlockData['blockType'] = blockType;
+                                individualBlockData['isSolid'] = isSolidBlock;
+                                rowData['blockData'][yCoord] = individualBlockData;
+                            } else {
+                                if (distanceFromGroundLevel == -1 && getRandomInt(0, 3) == 1) {
+                                    blockType = 'grassoverlay';
+                                    isSolidBlock = false;
+                                    individualBlockData['blockType'] = blockType;
+                                    individualBlockData['isSolid'] = isSolidBlock;
+                                    rowData['blockData'][yCoord] = individualBlockData;
+                                } else if (distanceFromGroundLevel == -1 && getRandomInt(0, 6) == 1) {
+                                    blockType = 'shrubbery';
+                                    isSolidBlock = false;
+                                    individualBlockData['blockType'] = blockType;
+                                    individualBlockData['isSolid'] = isSolidBlock;
+                                    rowData['blockData'][yCoord] = individualBlockData;
+                                }
+                            }
+                        }
+                        previousTerrainData[xCoord] = rowData;
+                    }
+                }
+                return previousTerrainData;
+            }
+            var gridDebugMode = false; //disable for public release
+            var infoDebugMode = false; //disable for public release
+            var darknessLevel = 0;
+            var canvas = document.getElementById('gamecanvas');
+            var ctx = canvas.getContext('2d');
+            var sprites = {
+                'character':document.getElementById('sprites.charactersprite'),
+                'dirtblock':document.getElementById('sprites.dirtblocksprite'),
+                'errorblock':document.getElementById('sprites.errorblocksprite'),
+                'grassblock':document.getElementById('sprites.grassblocksprite'),
+                'stoneblock':document.getElementById('sprites.stoneblocksprite'),
+                'grassoverlay':document.getElementById('sprites.grassoverlaysprite'),
+                'crosshair':document.getElementById('sprites.crosshair'),
+                'tree1':document.getElementById('sprites.treesprite1'),
+                'shrubbery':document.getElementById('sprites.shrubberyoverlaysprite')
+            }
+            var canvasBGColor = 'rgba(0, 0, 0, 1)';
+            var blockSizeInPixels = 50;
+            var running = true;
+            var gameData = {
+                'meta':{
+                    'version':[0, 0, 1],
+                },'terrainData':{
+                },'playerData':{
+                    'velocities':{
+                        'x':0,
+                        'y':0
+                    },
+                    'position':[0, 0]
+                }
+            };
+            function drawLoop() {
+                canvas.width = canvas.clientWidth;
+                canvas.height = canvas.clientHeight;
+                canvasBGColor = 'rgba(0, 0, 0, ' + darknessLevel + ')';
+                ctx.fillStyle = canvasBGColor;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                maxAmountOfBlocksOnXAxis = Math.floor(canvas.width / blockSizeInPixels);
+                maxAmountOfBlocksOnYAxis = Math.floor(canvas.height / blockSizeInPixels);
+                alphaDarkness = 1 - darknessLevel;
+                alphaDarkness = alphaDarkness + (darknessLevel / 2);
+                ctx.globalAlpha = alphaDarkness; //draw sprites below here
+                //BELOW HERE IS A MESS - IM SORRY IF YOU ARE THE ONE WHO WAS CALLED TO REWRITE IT
+                if (!(Math.floor(gameData['playerData']['position'][0]) + maxAmountOfBlocksOnXAxis in gameData['terrainData'])) {
+                    terrainData = Object.keys(gameData['terrainData']);
+                    try {
+                        blockHeightsForMaxCoord = gameData['terrainData'];
+                        blockHeightsForMaxCoord = Object.keys(blockHeightsForMaxCoord);
+                        tmpList1 = [];
+                        for (key = 0;key < blockHeightsForMaxCoord.length;key++) {
+                            tmpList1.push(parseInt(blockHeightsForMaxCoord[key]));
+                        }
+                        blockHeightsForMaxCoord = Math.max.apply(null, tmpList1);
+                        columnData = Object.keys(gameData['terrainData'][blockHeightsForMaxCoord]['blockData']);
+                        tmpList2 = [];
+                        for (key = 0;key < columnData.length;key++) {
+                            tmpList2.push(parseInt(columnData[key]));
+                        }
+                        prevoiusGroundLevel = Math.max.apply(null, tmpList2);
+                    } catch (e) {
+                        prevoiusGroundLevel = 0;
+                    }
+                    gameData['terrainData'] = generateTerrainChunk(Math.floor(gameData['playerData']['position'][0]), Math.floor(gameData['playerData']['position'][0]) + maxAmountOfBlocksOnXAxis, 10, -10, 0, 200, prevoiusGroundLevel, gameData['terrainData']);
+                } 
+                //ABOVE HERE IS A MESS - IM SORRY IF YOU ARE THE ONE WHO WAS CALLED TO REWRITE IT
+                positionFloatingPointLeftovers = [(gameData['playerData']['position'][0] - Math.floor(gameData['playerData']['position'][0])), (gameData['playerData']['position'][1] - Math.floor(gameData['playerData']['position'][1]))];
+                characterSpriteXCoord = Math.ceil((maxAmountOfBlocksOnXAxis / 2));
+                for (blockX = -characterSpriteXCoord + positionFloatingPointLeftovers[0];blockX < maxAmountOfBlocksOnXAxis - characterSpriteXCoord;blockX++) {
+                    try {
+                        rowData = gameData['terrainData'][Math.floor(blockX + gameData['playerData']['position'][0])];
+                        drewCharacter = false;
+                        if (rowData != undefined) {
+                            for (YCoord in rowData['blockData']) {
+                                centerYCoord = Math.floor(maxAmountOfBlocksOnYAxis / 2) * blockSizeInPixels;
+                                individualData = rowData['blockData'][YCoord]['blockType'];
+                                blockYCoord = (centerYCoord - (YCoord * blockSizeInPixels)) + (gameData['playerData']['position'][1] * blockSizeInPixels);
+                                if (blockYCoord < maxAmountOfBlocksOnYAxis * blockSizeInPixels) {
+                                    spriteName = sprites[individualData];
+                                    if (spriteName == 'tree1') {
+                                        ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels * 5, blockSizeInPixels * 5);
+                                    } else {
+                                        ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels, blockSizeInPixels);
+                                    }
+                                }
+                            }
+                        }
+                    } catch(e) {
+                    }
+                    if (gridDebugMode) {
+                        ctx.strokeStyle = '#ffb900';
+                        ctx.beginPath();
+                        ctx.moveTo(blockX * blockSizeInPixels, 0);
+                        ctx.lineTo(blockX * blockSizeInPixels, screen.height);
+                        ctx.stroke();
+                        for (blockY = 0 + positionFloatingPointLeftovers[1];blockY <= maxAmountOfBlocksOnYAxis;blockY++) {
+                            ctx.beginPath();
+                            ctx.moveTo(0, blockY * blockSizeInPixels);
+                            ctx.lineTo(screen.width, blockY * blockSizeInPixels);
+                            ctx.stroke();
+                        }
+                    }
+                }
+                characterSpriteXCoord = (maxAmountOfBlocksOnXAxis / 2) * blockSizeInPixels;
+                characterSpriteYCoord = (Math.floor(maxAmountOfBlocksOnYAxis / 2) - 2) * blockSizeInPixels;
+                ctx.drawImage(sprites['character'], characterSpriteXCoord, characterSpriteYCoord, blockSizeInPixels, blockSizeInPixels * 2);
+                ctx.globalAlpha = 1; //draw spirites above here
+                isTouchingBlock = getIsTouchingBlock();
+                if (gameData['playerData']['velocities']['x'] > 0.2) {
+                    gameData['playerData']['velocities']['x'] -= 0.1;
+                } else if (gameData['playerData']['velocities']['x'] < -0.2) {
+                    gameData['playerData']['velocities']['x'] += 0.1;
+                } else {
+                    gameData['playerData']['velocities']['x'] = 0;
+                }
+                if (!isTouchingBlock) {
+                    if (Math.abs(gameData['playerData']['velocities']['y']) < 0.5) {
+                        gameData['playerData']['velocities']['y'] -= 0.005;
+                    }
+                }
+                if (isTouchingBlock) {
+                    gameData['playerData']['velocities']['y'] = 0;
+                    gameData['playerData']['position'][1] = getTouchingBlockCoord();
+                }
+                gameData['playerData']['position'][0] += gameData['playerData']['velocities']['x'];
+                gameData['playerData']['position'][1] += gameData['playerData']['velocities']['y'];
+                //running = false;
+                if (running) {
+                    window.requestAnimationFrame(drawLoop);
+                } else {   
+                    console.log('Main draw loop ended.');
+                }
+            }
+            window.requestAnimationFrame(drawLoop);
+        </script>
+    </body>
+</html>
