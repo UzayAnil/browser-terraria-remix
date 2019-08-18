@@ -177,6 +177,11 @@
                         'y':0
                     },
                     'position':[0, 0]
+                }, 'boundaryData':{
+                    'xLeftBoundary':0,
+                    'xRightBoundary':500,
+                    'yTopBoundary':30,
+                    'yBottomBoundary':-30
                 }
             };
             function drawLoop() {
@@ -211,7 +216,7 @@
                     } catch (e) {
                         prevoiusGroundLevel = 0;
                     }
-                    gameData['terrainData'] = generateTerrainChunk(Math.floor(gameData['playerData']['position'][0]), Math.floor(gameData['playerData']['position'][0]) + maxAmountOfBlocksOnXAxis, 10, -10, 0, 200, prevoiusGroundLevel, gameData['terrainData']);
+                    gameData['terrainData'] = generateTerrainChunk(Math.floor(gameData['playerData']['position'][0]), Math.floor(gameData['playerData']['position'][0]) + maxAmountOfBlocksOnXAxis, gameData['boundaryData']['yTopBoundary'], gameData['boundaryData']['yBottomBoundary'], gameData['boundaryData']['xLeftBoundary'], gameData['boundaryData']['xRightBoundary'], prevoiusGroundLevel, gameData['terrainData']);
                 } 
                 //ABOVE HERE IS A MESS - IM SORRY IF YOU ARE THE ONE WHO WAS CALLED TO REWRITE IT
                 positionFloatingPointLeftovers = [(gameData['playerData']['position'][0] - Math.floor(gameData['playerData']['position'][0])), (gameData['playerData']['position'][1] - Math.floor(gameData['playerData']['position'][1]))];
