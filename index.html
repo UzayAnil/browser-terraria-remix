@@ -51,6 +51,19 @@
                 }
                 return isTouchingBlock;
             }
+            function getMaxBlockYCoord() {
+                var maxYCoord = 0;
+                var blocksInRow = gameData['terrainData'][Math.floor(gameData['playerData']['position'][0])]['blockData'];
+                var blocksInRowKeys = Object.keys(blocksInRow);
+                var blocksInRowKeysInts = [];
+                for (i = 0;i < blocksInRowKeys.length;i++) {
+                    if (blocksInRow[blocksInRowKeys[i]]['isSolid']) {
+                        blocksInRowKeysInts.push(parseInt(blocksInRowKeys[i]));
+                    }
+                }
+                maxYCoord = Math.max.apply(null, blocksInRowKeysInts);
+                return maxYCoord;
+            }
             function handleKeyDown(keyCode) {
                 isTouchingBlock = getIsTouchingBlock();
                 if (keyCode == 68) {
@@ -243,6 +256,9 @@
                 if (isTouchingBlock) {
                     gameData['playerData']['velocities']['y'] = 0;
                     gameData['playerData']['position'][1] = getTouchingBlockCoord();
+                }
+                if (isTouchingBlock && getTouchingBlockCoord() < getMaxBlockYCoord()) {
+                    gameData['playerData']['position'][1] = getTouchingBlockCoord() + 1;
                 }
                 gameData['playerData']['position'][0] += gameData['playerData']['velocities']['x'];
                 gameData['playerData']['position'][1] += gameData['playerData']['velocities']['y'];
