@@ -32,7 +32,7 @@
         <img src = './utils/ingame-images/shrubbery-overlay.png' id = 'sprites.shrubberyoverlaysprite' class = 'daylightAffectedSprite gameBlockSprite'/>
         <canvas id = 'gamecanvas'><p>Error showing canvas.</p></canvas>
         <script>
-            console.log('Press the + button to toggle the debug overlay.')
+            console.log('Press the "[" button to toggle the debug overlay.')
             function getRandomInt(min, max) {
                 return Math.floor(Math.random() * (max - min + 1) + min);
             }
@@ -76,6 +76,12 @@
                     blockSizeInPixels -= 10;
                 } else if (keyCode == 187) {
                     blockSizeInPixels += 10;
+                } else if (keyCode == 219) {
+                    infoDebugMode = !infoDebugMode;
+                } else if (keyCode == 221) {
+                    gridDebugMode = !gridDebugMode;
+                } else if (keyCode == 82) {
+                    gameData['playerData']['position'] = [0, 0];
                 }
             }
             function generateTerrainChunk(minXCoord, maxXCoord, maxHeight, minHeight, worldXMinBorder, worldXMaxBorder, prevoiusGroundLevel, previousTerrainData) {
@@ -225,12 +231,12 @@
                     if (gridDebugMode) {
                         ctx.strokeStyle = '#ffb900';
                         ctx.beginPath();
-                        ctx.moveTo(blockX * blockSizeInPixels, 0);
-                        ctx.lineTo(blockX * blockSizeInPixels, screen.height);
+                        ctx.moveTo((blockX + characterSpriteXCoord) * blockSizeInPixels, 0);
+                        ctx.lineTo((blockX + characterSpriteXCoord) * blockSizeInPixels, screen.height);
                         ctx.stroke();
                         for (blockY = 0 + positionFloatingPointLeftovers[1];blockY <= maxAmountOfBlocksOnYAxis;blockY++) {
                             ctx.beginPath();
-                            ctx.moveTo(0, blockY * blockSizeInPixels);
+                            ctx.moveTo(0, (blockY * blockSizeInPixels));
                             ctx.lineTo(screen.width, blockY * blockSizeInPixels);
                             ctx.stroke();
                         }
@@ -240,6 +246,18 @@
                 characterSpriteYCoord = (Math.floor(maxAmountOfBlocksOnYAxis / 2) - 2) * blockSizeInPixels;
                 ctx.drawImage(sprites['character'], characterSpriteXCoord, characterSpriteYCoord, blockSizeInPixels, blockSizeInPixels * 2);
                 ctx.globalAlpha = 1; //draw spirites above here
+                if (infoDebugMode) {
+                    debugItems = [
+                        String('POSITION: ' + String(gameData['playerData']['position'])),
+                        String('VELOCITY: ' + String(gameData['playerData']['velocities']['x']) + ',' + String(gameData['playerData']['velocities']['y'])),
+                        String('TOUCHING-BLOCK: ' + String(getIsTouchingBlock()))
+                    ];
+                    for (i = 0;i < debugItems.length;i++) {
+                        ctx.fillStyle = 'black';
+                        ctx.font = String((blockSizeInPixels / 2)) + 'px __local__pixelsplitter__';
+                        ctx.fillText(String(debugItems[i]), 0, (blockSizeInPixels / 2) + ((blockSizeInPixels / 2) * i));
+                    }
+                }
                 isTouchingBlock = getIsTouchingBlock();
                 if (gameData['playerData']['velocities']['x'] > 0.2) {
                     gameData['playerData']['velocities']['x'] -= 0.1;
