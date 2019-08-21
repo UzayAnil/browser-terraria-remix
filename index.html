@@ -30,15 +30,16 @@
         </style>
     </head>
     <body onkeydown = 'handleKeyDown(event.keyCode);'>
-        <img src = './utils/ingame-images/character-sprite.png' id = 'sprites.charactersprite' class = 'daylightAffectedSprite gameCharacterSprite'/>
-        <img src = './utils/ingame-images/dirt-block.png' id = 'sprites.dirtblocksprite' class = 'daylightAffectedSprite gameBlockSprite'/>
-        <img src = './utils/ingame-images/error-block.png' id = 'sprites.errorblocksprite' class = 'daylightAffectedSprite gameBlockSprite'/>
-        <img src = './utils/ingame-images/grass-block.png' id = 'sprites.grassblocksprite' class = 'daylightAffectedSprite gameBlockSprite'/>
-        <img src = './utils/ingame-images/stone-block.png' id = 'sprites.stoneblocksprite' class = 'daylightAffectedSprite gameBlockSprite'/>
-        <img src = './utils/ingame-images/grass-overlay.png' id = 'sprites.grassoverlaysprite' class = 'daylightAffectedSprite gameBlockSprite'/>
-        <img src = './utils/ingame-images/crosshair.png' id = 'sprites.crosshair'/>
-        <img src = './utils/ingame-images/tree-sprite.png' id = 'sprites.treesprite1' class = 'daylightAffectedSprite'/>
-        <img src = './utils/ingame-images/shrubbery-overlay.png' id = 'sprites.shrubberyoverlaysprite' class = 'daylightAffectedSprite gameBlockSprite'/>
+        <img src = './utils/ingame-images/character-sprite.png' id = 'sprites.charactersprite' class = 'daylightAffectedSprite gameCharacterSprite hiddenImage'/>
+        <img src = './utils/ingame-images/dirt-block.png' id = 'sprites.dirtblocksprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
+        <img src = './utils/ingame-images/error-block.png' id = 'sprites.errorblocksprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
+        <img src = './utils/ingame-images/grass-block.png' id = 'sprites.grassblocksprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
+        <img src = './utils/ingame-images/stone-block.png' id = 'sprites.stoneblocksprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
+        <img src = './utils/ingame-images/grass-overlay.png' id = 'sprites.grassoverlaysprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
+        <img src = './utils/ingame-images/crosshair.png' id = 'sprites.crosshair' class = 'hiddenImage'/>
+        <img src = './utils/ingame-images/tree-sprite.png' id = 'sprites.treesprite1' class = 'daylightAffectedSprite hiddenImage'/>
+        <img src = './utils/ingame-images/shrubbery-overlay.png' id = 'sprites.shrubberyoverlaysprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
+        <img src = './utils/ingame-images/startscreen-art.png' id = 'sprites.startscreenart' class = 'hiddenImage'/>
         <canvas id = 'gamecanvas'><p>Error showing canvas.</p></canvas>
         <script>
             console.log('Press the "[" button to toggle the debug overlay.')
@@ -74,19 +75,25 @@
                 return maxYCoord;
             }
             function handleKeyDown(keyCode) {
-                isTouchingBlock = getIsTouchingBlock();
-                if (keyCode == 68) {
-                    gameData['playerData']['position'][0] += 0.5;
-                } else if (keyCode == 65) {
-                    gameData['playerData']['position'][0] -= 0.5;
-                } else if (keyCode == 87 && isTouchingBlock) {
-                    gameData['playerData']['position'][1] += 2;
-                } else if (keyCode == 219) {
-                    infoDebugMode = !infoDebugMode;
-                } else if (keyCode == 221) {
-                    gridDebugMode = !gridDebugMode;
-                } else if (keyCode == 82) {
-                    gameData['playerData']['position'] = [0, 0];
+                if (gameScreenMode == 'ingame') {
+                    isTouchingBlock = getIsTouchingBlock();
+                    if (keyCode == 68) {
+                        gameData['playerData']['position'][0] += 0.5;
+                    } else if (keyCode == 65) {
+                        gameData['playerData']['position'][0] -= 0.5;
+                    } else if (keyCode == 87 && isTouchingBlock) {
+                        gameData['playerData']['position'][1] += 2;
+                    } else if (keyCode == 219) {
+                        infoDebugMode = !infoDebugMode;
+                    } else if (keyCode == 221) {
+                        gridDebugMode = !gridDebugMode;
+                    } else if (keyCode == 82) {
+                        gameData['playerData']['position'] = [0, 0];
+                    }
+                } else if (gameScreenMode == 'start') {
+                    if (keyCode == startScreenAssets['startscreenbg']['keypresstostart']['keyCode']) {
+                        gameScreenMode = 'ingame';
+                    }
                 }
             }
             function generateTerrainChunk(minXCoord, maxXCoord, maxHeight, minHeight, worldXMinBorder, worldXMaxBorder, prevoiusGroundLevel, previousTerrainData) {
@@ -144,6 +151,7 @@
                 }
                 return previousTerrainData;
             }
+            var gameScreenMode = 'start';
             var gridDebugMode = false; //disable for public release
             var infoDebugMode = false; //disable for public release
             var darknessLevel = 0;
@@ -158,7 +166,16 @@
                 'grassoverlay':document.getElementById('sprites.grassoverlaysprite'),
                 'crosshair':document.getElementById('sprites.crosshair'),
                 'tree1':document.getElementById('sprites.treesprite1'),
-                'shrubbery':document.getElementById('sprites.shrubberyoverlaysprite')
+                'shrubbery':document.getElementById('sprites.shrubberyoverlaysprite'),
+            }
+            var startScreenAssets = {
+                'startscreenbg':{
+                    'image':document.getElementById('sprites.startscreenart'),
+                    'dimensions':[1800, 1800],
+                    'keypresstostart':{
+                        'keyCode':83
+                    }
+                }
             }
             var canvasBGColor = 'rgba(0, 0, 0, 1)';
             var blockSizeInPixels = 50;
@@ -193,113 +210,125 @@
                 ctx.fillStyle = canvasBGColor;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                maxAmountOfBlocksOnXAxis = Math.floor(canvas.width / blockSizeInPixels);
-                maxAmountOfBlocksOnYAxis = Math.floor(canvas.height / blockSizeInPixels);
-                alphaDarkness = 1 - darknessLevel;
-                alphaDarkness = alphaDarkness + (darknessLevel / 2);
-                ctx.globalAlpha = alphaDarkness; //draw sprites below here
-                //BELOW HERE IS A MESS - IM SORRY IF YOU ARE THE ONE WHO WAS CALLED TO REWRITE IT
-                if (!(Math.floor(gameData['playerData']['position'][0]) + maxAmountOfBlocksOnXAxis in gameData['terrainData'])) {
-                    terrainData = Object.keys(gameData['terrainData']);
-                    try {
-                        blockHeightsForMaxCoord = gameData['terrainData'];
-                        blockHeightsForMaxCoord = Object.keys(blockHeightsForMaxCoord);
-                        tmpList1 = [];
-                        for (key = 0;key < blockHeightsForMaxCoord.length;key++) {
-                            tmpList1.push(parseInt(blockHeightsForMaxCoord[key]));
+                if (gameScreenMode == 'ingame') {
+                    maxAmountOfBlocksOnXAxis = Math.floor(canvas.width / blockSizeInPixels);
+                    maxAmountOfBlocksOnYAxis = Math.floor(canvas.height / blockSizeInPixels);
+                    alphaDarkness = 1 - darknessLevel;
+                    alphaDarkness = alphaDarkness + (darknessLevel / 2);
+                    ctx.globalAlpha = alphaDarkness; //draw sprites below here
+                    //BELOW HERE IS A MESS - IM SORRY IF YOU ARE THE ONE WHO WAS CALLED TO REWRITE IT
+                    if (!(Math.floor(gameData['playerData']['position'][0]) + maxAmountOfBlocksOnXAxis in gameData['terrainData'])) {
+                        terrainData = Object.keys(gameData['terrainData']);
+                        try {
+                            blockHeightsForMaxCoord = gameData['terrainData'];
+                            blockHeightsForMaxCoord = Object.keys(blockHeightsForMaxCoord);
+                            tmpList1 = [];
+                            for (key = 0;key < blockHeightsForMaxCoord.length;key++) {
+                                tmpList1.push(parseInt(blockHeightsForMaxCoord[key]));
+                            }
+                            blockHeightsForMaxCoord = Math.max.apply(null, tmpList1);
+                            columnData = Object.keys(gameData['terrainData'][blockHeightsForMaxCoord]['blockData']);
+                            tmpList2 = [];
+                            for (key = 0;key < columnData.length;key++) {
+                                tmpList2.push(parseInt(columnData[key]));
+                            }
+                            prevoiusGroundLevel = Math.max.apply(null, tmpList2);
+                        } catch (e) {
+                            prevoiusGroundLevel = 0;
                         }
-                        blockHeightsForMaxCoord = Math.max.apply(null, tmpList1);
-                        columnData = Object.keys(gameData['terrainData'][blockHeightsForMaxCoord]['blockData']);
-                        tmpList2 = [];
-                        for (key = 0;key < columnData.length;key++) {
-                            tmpList2.push(parseInt(columnData[key]));
-                        }
-                        prevoiusGroundLevel = Math.max.apply(null, tmpList2);
-                    } catch (e) {
-                        prevoiusGroundLevel = 0;
-                    }
-                    gameData['terrainData'] = generateTerrainChunk(Math.floor(gameData['playerData']['position'][0]), Math.floor(gameData['playerData']['position'][0]) + maxAmountOfBlocksOnXAxis, gameData['boundaryData']['yTopBoundary'], gameData['boundaryData']['yBottomBoundary'], gameData['boundaryData']['xLeftBoundary'], gameData['boundaryData']['xRightBoundary'], prevoiusGroundLevel, gameData['terrainData']);
-                } 
-                //ABOVE HERE IS A MESS - IM SORRY IF YOU ARE THE ONE WHO WAS CALLED TO REWRITE IT
-                positionFloatingPointLeftovers = [(gameData['playerData']['position'][0] - Math.floor(gameData['playerData']['position'][0])), (gameData['playerData']['position'][1] - Math.floor(gameData['playerData']['position'][1]))];
-                characterSpriteXCoord = Math.ceil((maxAmountOfBlocksOnXAxis / 2));
-                for (blockX = -characterSpriteXCoord + positionFloatingPointLeftovers[0];blockX < maxAmountOfBlocksOnXAxis - characterSpriteXCoord;blockX++) {
-                    try {
-                        rowData = gameData['terrainData'][Math.floor(blockX + gameData['playerData']['position'][0])];
-                        drewCharacter = false;
-                        if (rowData != undefined) {
-                            for (YCoord in rowData['blockData']) {
-                                centerYCoord = Math.floor(maxAmountOfBlocksOnYAxis / 2) * blockSizeInPixels;
-                                individualData = rowData['blockData'][YCoord]['blockType'];
-                                blockYCoord = (centerYCoord - (YCoord * blockSizeInPixels)) + (gameData['playerData']['position'][1] * blockSizeInPixels);
-                                if (blockYCoord < maxAmountOfBlocksOnYAxis * blockSizeInPixels) {
-                                    spriteName = sprites[individualData];
-                                    if (spriteName == 'tree1') {
-                                        ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels * 5, blockSizeInPixels * 5);
-                                    } else {
-                                        ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels, blockSizeInPixels);
+                        gameData['terrainData'] = generateTerrainChunk(Math.floor(gameData['playerData']['position'][0]), Math.floor(gameData['playerData']['position'][0]) + maxAmountOfBlocksOnXAxis, gameData['boundaryData']['yTopBoundary'], gameData['boundaryData']['yBottomBoundary'], gameData['boundaryData']['xLeftBoundary'], gameData['boundaryData']['xRightBoundary'], prevoiusGroundLevel, gameData['terrainData']);
+                    } 
+                    //ABOVE HERE IS A MESS - IM SORRY IF YOU ARE THE ONE WHO WAS CALLED TO REWRITE IT
+                    positionFloatingPointLeftovers = [(gameData['playerData']['position'][0] - Math.floor(gameData['playerData']['position'][0])), (gameData['playerData']['position'][1] - Math.floor(gameData['playerData']['position'][1]))];
+                    characterSpriteXCoord = Math.ceil((maxAmountOfBlocksOnXAxis / 2));
+                    for (blockX = -characterSpriteXCoord + positionFloatingPointLeftovers[0];blockX < maxAmountOfBlocksOnXAxis - characterSpriteXCoord;blockX++) {
+                        try {
+                            rowData = gameData['terrainData'][Math.floor(blockX + gameData['playerData']['position'][0])];
+                            drewCharacter = false;
+                            if (rowData != undefined) {
+                                for (YCoord in rowData['blockData']) {
+                                    centerYCoord = Math.floor(maxAmountOfBlocksOnYAxis / 2) * blockSizeInPixels;
+                                    individualData = rowData['blockData'][YCoord]['blockType'];
+                                    blockYCoord = (centerYCoord - (YCoord * blockSizeInPixels)) + (gameData['playerData']['position'][1] * blockSizeInPixels);
+                                    if (blockYCoord < maxAmountOfBlocksOnYAxis * blockSizeInPixels) {
+                                        spriteName = sprites[individualData];
+                                        if (spriteName == 'tree1') {
+                                            ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels * 5, blockSizeInPixels * 5);
+                                        } else {
+                                            ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels, blockSizeInPixels);
+                                        }
                                     }
                                 }
                             }
+                        } catch(e) {
                         }
-                    } catch(e) {
-                    }
-                    if (gridDebugMode) {
-                        ctx.strokeStyle = '#ffb900';
-                        ctx.beginPath();
-                        ctx.moveTo((blockX + characterSpriteXCoord) * blockSizeInPixels, 0);
-                        ctx.lineTo((blockX + characterSpriteXCoord) * blockSizeInPixels, screen.height);
-                        ctx.stroke();
-                        for (blockY = 0 + positionFloatingPointLeftovers[1];blockY <= maxAmountOfBlocksOnYAxis;blockY++) {
+                        if (gridDebugMode) {
+                            ctx.strokeStyle = '#ffb900';
                             ctx.beginPath();
-                            ctx.moveTo(0, (blockY * blockSizeInPixels));
-                            ctx.lineTo(screen.width, blockY * blockSizeInPixels);
+                            ctx.moveTo((blockX + characterSpriteXCoord) * blockSizeInPixels, 0);
+                            ctx.lineTo((blockX + characterSpriteXCoord) * blockSizeInPixels, screen.height);
                             ctx.stroke();
+                            for (blockY = 0 + positionFloatingPointLeftovers[1];blockY <= maxAmountOfBlocksOnYAxis;blockY++) {
+                                ctx.beginPath();
+                                ctx.moveTo(0, (blockY * blockSizeInPixels));
+                                ctx.lineTo(screen.width, blockY * blockSizeInPixels);
+                                ctx.stroke();
+                            }
                         }
                     }
-                }
-                characterSpriteXCoord = (maxAmountOfBlocksOnXAxis / 2) * blockSizeInPixels;
-                characterSpriteYCoord = (Math.floor(maxAmountOfBlocksOnYAxis / 2) - 2) * blockSizeInPixels;
-                ctx.drawImage(sprites['character'], characterSpriteXCoord, characterSpriteYCoord, blockSizeInPixels, blockSizeInPixels * 2);
-                ctx.globalAlpha = 1; //draw spirites above here
-                if (infoDebugMode) {
-                    debugItems = [
-                        String('POSITION: ' + String(gameData['playerData']['position'])),
-                        String('VELOCITY: ' + String(gameData['playerData']['velocities']['x']) + ',' + String(gameData['playerData']['velocities']['y'])),
-                        String('TOUCHING-BLOCK: ' + String(getIsTouchingBlock())),
-                        String('FPS: ' + String(Math.round(lastFps * 60)))
-                    ];
-                    for (i = 0;i < debugItems.length;i++) {
-                        ctx.fillStyle = 'black';
-                        ctx.font = String((blockSizeInPixels / 2)) + 'px __local__pixelsplitter__';
-                        ctx.fillText(String(debugItems[i]), 0, (blockSizeInPixels / 2) + ((blockSizeInPixels / 2) * i));
+                    characterSpriteXCoord = (maxAmountOfBlocksOnXAxis / 2) * blockSizeInPixels;
+                    characterSpriteYCoord = (Math.floor(maxAmountOfBlocksOnYAxis / 2) - 2) * blockSizeInPixels;
+                    ctx.drawImage(sprites['character'], characterSpriteXCoord, characterSpriteYCoord, blockSizeInPixels, blockSizeInPixels * 2);
+                    ctx.globalAlpha = 1; //draw spirites above here
+                    if (infoDebugMode) {
+                        debugItems = [
+                            String('POSITION: ' + String(gameData['playerData']['position'])),
+                            String('VELOCITY: ' + String(gameData['playerData']['velocities']['x']) + ',' + String(gameData['playerData']['velocities']['y'])),
+                            String('TOUCHING-BLOCK: ' + String(getIsTouchingBlock())),
+                            String('FPS: ' + String(Math.round(lastFps * 60)))
+                        ];
+                        for (i = 0;i < debugItems.length;i++) {
+                            ctx.fillStyle = 'black';
+                            ctx.font = String((blockSizeInPixels / 2)) + 'px __local__pixelsplitter__';
+                            ctx.fillText(String(debugItems[i]), 0, (blockSizeInPixels / 2) + ((blockSizeInPixels / 2) * i));
+                        }
                     }
-                }
-                ctx.drawImage(sprites['crosshair'], mouseCoords[0] - (blockSizeInPixels / 2), mouseCoords[1] - (blockSizeInPixels / 2), blockSizeInPixels, blockSizeInPixels);
-                isTouchingBlock = getIsTouchingBlock();
-                if (gameData['playerData']['velocities']['x'] > 0.2) {
-                    gameData['playerData']['velocities']['x'] -= 0.1;
-                } else if (gameData['playerData']['velocities']['x'] < -0.2) {
-                    gameData['playerData']['velocities']['x'] += 0.1;
+                    ctx.drawImage(sprites['crosshair'], mouseCoords[0] - (blockSizeInPixels / 2), mouseCoords[1] - (blockSizeInPixels / 2), blockSizeInPixels, blockSizeInPixels);
+                    isTouchingBlock = getIsTouchingBlock();
+                    if (gameData['playerData']['velocities']['x'] > 0.2) {
+                        gameData['playerData']['velocities']['x'] -= 0.1;
+                    } else if (gameData['playerData']['velocities']['x'] < -0.2) {
+                        gameData['playerData']['velocities']['x'] += 0.1;
+                    } else {
+                        gameData['playerData']['velocities']['x'] = 0;
+                    }
+                    if (!isTouchingBlock) {
+                        if (Math.abs(gameData['playerData']['velocities']['y']) < 0.5) {
+                            gameData['playerData']['velocities']['y'] -= 0.005;
+                        }
+                    }
+                    if (isTouchingBlock) {
+                        gameData['playerData']['velocities']['y'] = 0;
+                        gameData['playerData']['position'][1] = getTouchingBlockCoord();
+                    }
+                    if (isTouchingBlock && getTouchingBlockCoord() < getMaxBlockYCoord()) {
+                        gameData['playerData']['position'][1] = getTouchingBlockCoord() + 1;
+                    }
+                    gameData['playerData']['position'][0] += gameData['playerData']['velocities']['x'];
+                    gameData['playerData']['position'][1] += gameData['playerData']['velocities']['y'];
+                    endTime = performance.now();
+                    lastFps = (endTime - startTime);
+                } else if (gameScreenMode == 'start') {
+                    startScreenImageCoords = [0, 0];
+                    startScreenImageSize = startScreenAssets['startscreenbg']['dimensions'];
+                    screenAspectRatio = startScreenImageSize[0] / startScreenImageSize[1];
+                    startScreenImageSize[1] = canvas.height;
+                    startScreenImageSize[0] = canvas.height * screenAspectRatio;
+                    startScreenImageCoords[0] = (canvas.width - startScreenImageSize[0]) / 2;
+                    ctx.drawImage(startScreenAssets['startscreenbg']['image'], startScreenImageCoords[0], startScreenImageCoords[1], startScreenImageSize[0], startScreenImageSize[1]);
                 } else {
-                    gameData['playerData']['velocities']['x'] = 0;
+                    gameScreenMode = 'start';
                 }
-                if (!isTouchingBlock) {
-                    if (Math.abs(gameData['playerData']['velocities']['y']) < 0.5) {
-                        gameData['playerData']['velocities']['y'] -= 0.005;
-                    }
-                }
-                if (isTouchingBlock) {
-                    gameData['playerData']['velocities']['y'] = 0;
-                    gameData['playerData']['position'][1] = getTouchingBlockCoord();
-                }
-                if (isTouchingBlock && getTouchingBlockCoord() < getMaxBlockYCoord()) {
-                    gameData['playerData']['position'][1] = getTouchingBlockCoord() + 1;
-                }
-                gameData['playerData']['position'][0] += gameData['playerData']['velocities']['x'];
-                gameData['playerData']['position'][1] += gameData['playerData']['velocities']['y'];
-                endTime = performance.now();
-                lastFps = (endTime - startTime);
                 //running = false;
                 if (running) {
                     window.requestAnimationFrame(drawLoop);
