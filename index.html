@@ -1,6 +1,6 @@
 <!--
     TODO:
-        1.] Make it so that the player doesnt phase through terrain when going sideways to a block that is higher than the current one.
+        1.] Make it so that the player doesnt turn transparent when the darkness is lowered.
         2.] Add trees (make them 1 solid image that can be destroyed for items).
         3.] Make a debug UI.
         4.] Add an inventory section.
@@ -277,10 +277,10 @@
                             }
                         }
                     }
+                    ctx.globalAlpha = 1; //draw spirites above here
                     characterSpriteXCoord = (maxAmountOfBlocksOnXAxis / 2) * blockSizeInPixels;
                     characterSpriteYCoord = (Math.floor(maxAmountOfBlocksOnYAxis / 2) - 2) * blockSizeInPixels;
                     ctx.drawImage(sprites['character'], characterSpriteXCoord, characterSpriteYCoord, blockSizeInPixels, blockSizeInPixels * 2);
-                    ctx.globalAlpha = 1; //draw spirites above here
                     if (infoDebugMode) {
                         debugItems = [
                             String('POSITION: ' + String(gameData['playerData']['position'])),
