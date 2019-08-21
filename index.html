@@ -81,10 +81,6 @@
                     gameData['playerData']['position'][0] -= 0.5;
                 } else if (keyCode == 87 && isTouchingBlock) {
                     gameData['playerData']['position'][1] += 2;
-                } else if (keyCode == 189) {
-                    blockSizeInPixels -= 10;
-                } else if (keyCode == 187) {
-                    blockSizeInPixels += 10;
                 } else if (keyCode == 219) {
                     infoDebugMode = !infoDebugMode;
                 } else if (keyCode == 221) {
@@ -188,7 +184,9 @@
             ctx.canvas.addEventListener('mousemove', function(event){
                 mouseCoords = [event.clientX - ctx.canvas.offsetLeft, event.clientY - ctx.canvas.offsetTop];
             });
+            var lastFps = 0;
             function drawLoop() {
+                startTime = performance.now();
                 canvas.width = canvas.clientWidth;
                 canvas.height = canvas.clientHeight;
                 canvasBGColor = 'rgba(0, 0, 0, ' + darknessLevel + ')';
@@ -268,7 +266,8 @@
                     debugItems = [
                         String('POSITION: ' + String(gameData['playerData']['position'])),
                         String('VELOCITY: ' + String(gameData['playerData']['velocities']['x']) + ',' + String(gameData['playerData']['velocities']['y'])),
-                        String('TOUCHING-BLOCK: ' + String(getIsTouchingBlock()))
+                        String('TOUCHING-BLOCK: ' + String(getIsTouchingBlock())),
+                        String('FPS: ' + String(Math.round(lastFps * 60)))
                     ];
                     for (i = 0;i < debugItems.length;i++) {
                         ctx.fillStyle = 'black';
@@ -299,6 +298,8 @@
                 }
                 gameData['playerData']['position'][0] += gameData['playerData']['velocities']['x'];
                 gameData['playerData']['position'][1] += gameData['playerData']['velocities']['y'];
+                endTime = performance.now();
+                lastFps = (endTime - startTime);
                 //running = false;
                 if (running) {
                     window.requestAnimationFrame(drawLoop);
