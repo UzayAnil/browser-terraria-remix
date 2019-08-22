@@ -358,8 +358,8 @@
                     if (showCrosshairOnScreen) {
                         ctx.drawImage(sprites['crosshair'], mouseCoords[0] - (blockSizeInPixels / 2), mouseCoords[1] - (blockSizeInPixels / 2), blockSizeInPixels, blockSizeInPixels);
                         selectionIndicatorCoords = [
-                            blockSizeInPixels * Math.floor(mouseCoords[0] / blockSizeInPixels),
-                            blockSizeInPixels * Math.floor(mouseCoords[1] / blockSizeInPixels),
+                            blockSizeInPixels * (Math.floor(mouseCoords[0] / blockSizeInPixels) - positionFloatingPointLeftovers[0]),
+                            blockSizeInPixels * (Math.floor(mouseCoords[1] / blockSizeInPixels) - positionFloatingPointLeftovers[1]),
                         ];
                         ctx.drawImage(sprites['selectionindicator'], selectionIndicatorCoords[0], selectionIndicatorCoords[1], blockSizeInPixels, blockSizeInPixels);
                     }
