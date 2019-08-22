@@ -74,6 +74,19 @@
                 maxYCoord = Math.max.apply(null, blocksInRowKeysInts);
                 return maxYCoord;
             }
+            function getMaxBlockYCoordForGivenXCoord(xCoord) {
+                var maxYCoord = 0;
+                var blocksInRow = gameData['terrainData'][Math.floor(xCoord)]['blockData'];
+                var blocksInRowKeys = Object.keys(blocksInRow);
+                var blocksInRowKeysInts = [];
+                for (i = 0;i < blocksInRowKeys.length;i++) {
+                    if (blocksInRow[blocksInRowKeys[i]]['isSolid']) {
+                        blocksInRowKeysInts.push(parseInt(blocksInRowKeys[i]));
+                    }
+                }
+                maxYCoord = Math.max.apply(null, blocksInRowKeysInts);
+                return maxYCoord;
+            }
             function handleKeyDown(keyCode) {
                 if (gameScreenMode == 'ingame') {
                     isTouchingBlock = getIsTouchingBlock();
@@ -161,6 +174,13 @@
                 }
                 return previousTerrainData;
             }
+            var shaderMode = 'blocky-depth-shaders-1';
+            var shaderPresets = {
+                'blocky-depth-shaders-1':{
+                    'maxLightPenetrationDepth':3,
+                    'minDarkness':0.8,
+                }
+            };
             var showCrosshairOnScreen = true;
             var showCharactersOnScreen = true;
             var gameScreenMode = 'ingame';
@@ -190,7 +210,7 @@
                 }
             };
             var canvasBGColor = 'rgba(0, 0, 0, 1)';
-            var blockSizeInPixels = 50;
+            var blockSizeInPixels = 40;
             var running = true;
             var gameData = {
                 'meta':{
@@ -269,7 +289,25 @@
                                             ctx.drawImage(spriteName, (((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0]) - blockSizeInPixels, blockYCoord - (blockSizeInPixels * 3), (blockSizeInPixels * 3), (blockSizeInPixels * 4));
                                         } else {
                                             ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels + 1, blockSizeInPixels);
+                                            if (shaderMode == 'blocky-depth-shaders-1' && rowData['blockData'][YCoord]['isSolid']) {
+                                                distanceFromTopSolidBlock = getMaxBlockYCoordForGivenXCoord(blockX + gameData['playerData']['position'][0]) - YCoord;
+                                                previousFillColor = ctx.fillStyle;
+                                                depthDarkness = 0;
+                                                shaderData = shaderPresets[shaderMode];
+                                                darknessStep = shaderData['minDarkness'] / shaderData['maxLightPenetrationDepth'];
+                                                if (distanceFromTopSolidBlock <= shaderData['maxLightPenetrationDepth']) {
+                                                    depthDarkness = darknessStep * distanceFromTopSolidBlock;
+                                                } else if (distanceFromTopSolidBlock > shaderData['maxLightPenetrationDepth']) {
+                                                    depthDarkness = shaderData['minDarkness'];
+                                                }
+                                                blockFillColor = 'rgba(0, 0, 0, ' + String(depthDarkness) + ')'
+                                                ctx.fillStyle = blockFillColor;
+                                                ctx.fillRect(((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels + 1, blockSizeInPixels);
+                                                ctx.fillStyle = previousFillColor;
+                                                distanceFromTopSolidBlock++;
+                                            }
                                         }
+                                        distanceFromTopSolidBlock++;
                                     }
                                 }
                             }
