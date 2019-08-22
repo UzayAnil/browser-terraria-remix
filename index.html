@@ -40,6 +40,7 @@
         <img src = './utils/ingame-images/tree-sprite.png' id = 'sprites.treesprite1' class = 'daylightAffectedSprite hiddenImage'/>
         <img src = './utils/ingame-images/shrubbery-overlay.png' id = 'sprites.shrubberyoverlaysprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
         <img src = './utils/ingame-images/startscreen-art.png' id = 'sprites.startscreenart' class = 'hiddenImage'/>
+        <img src = './utils/ingame-images/crosshair-block-selection-outline.png' id = 'sprites.crosshairselectionindicator' class = 'hiddenImage'/>
         <canvas id = 'gamecanvas'><p>Error showing canvas.</p></canvas>
         <script>
             console.log('Press the "[" button to toggle the debug overlay.')
@@ -204,6 +205,7 @@
                 'crosshair':document.getElementById('sprites.crosshair'),
                 'tree1':document.getElementById('sprites.treesprite1'),
                 'shrubbery':document.getElementById('sprites.shrubberyoverlaysprite'),
+                'selectionindicator':document.getElementById('sprites.crosshairselectionindicator')
             };
             var startScreenAssets = {
                 'startscreenbg':{
@@ -355,6 +357,11 @@
                     }
                     if (showCrosshairOnScreen) {
                         ctx.drawImage(sprites['crosshair'], mouseCoords[0] - (blockSizeInPixels / 2), mouseCoords[1] - (blockSizeInPixels / 2), blockSizeInPixels, blockSizeInPixels);
+                        selectionIndicatorCoords = [
+                            blockSizeInPixels * Math.floor(mouseCoords[0] / blockSizeInPixels),
+                            blockSizeInPixels * Math.floor(mouseCoords[1] / blockSizeInPixels),
+                        ];
+                        ctx.drawImage(sprites['selectionindicator'], selectionIndicatorCoords[0], selectionIndicatorCoords[1], blockSizeInPixels, blockSizeInPixels);
                     }
                     isTouchingBlock = getIsTouchingBlock();
                     if (gameData['playerData']['velocities']['x'] > 0.2) {
