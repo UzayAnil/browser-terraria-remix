@@ -274,7 +274,7 @@
                     //ABOVE HERE IS A MESS - IM SORRY IF YOU ARE THE ONE WHO WAS CALLED TO REWRITE IT
                     positionFloatingPointLeftovers = [(gameData['playerData']['position'][0] - Math.floor(gameData['playerData']['position'][0])), (gameData['playerData']['position'][1] - Math.floor(gameData['playerData']['position'][1]))];
                     characterSpriteXCoord = Math.ceil((maxAmountOfBlocksOnXAxis / 2));
-                    for (blockX = -characterSpriteXCoord + positionFloatingPointLeftovers[0];blockX < maxAmountOfBlocksOnXAxis - characterSpriteXCoord;blockX++) {
+                    for (blockX = -characterSpriteXCoord + positionFloatingPointLeftovers[0] - 1;blockX < maxAmountOfBlocksOnXAxis - characterSpriteXCoord;blockX++) {
                         try {
                             rowData = gameData['terrainData'][Math.floor(blockX + gameData['playerData']['position'][0])];
                             drewCharacter = false;
