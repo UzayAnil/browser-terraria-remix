@@ -338,7 +338,9 @@
                             String('POSITION: ' + String(gameData['playerData']['position'])),
                             String('VELOCITY: ' + String(gameData['playerData']['velocities']['x']) + ',' + String(gameData['playerData']['velocities']['y'])),
                             String('TOUCHING-BLOCK: ' + String(getIsTouchingBlock())),
-                            String('FPS: ' + String(Math.round(lastFps * 60)))
+                            String('CURRENT-LOOP-START: ' + String(startTime)),
+                            String('PREVIOUS-LOOP-END: ' + String(endTime)),
+                            String('LOOP-START-TO-END-TIME: ' + String(lastFps))
                         ];
                         for (i = 0;i < debugItems.length;i++) {
                             ctx.fillStyle = 'black';
@@ -372,7 +374,7 @@
                     gameData['playerData']['position'][0] += gameData['playerData']['velocities']['x'];
                     gameData['playerData']['position'][1] += gameData['playerData']['velocities']['y'];
                     endTime = performance.now();
-                    lastFps = (endTime - startTime);
+                    lastFps = (endTime - startTime) / 1000;
                 } else if (gameScreenMode == 'start') {
                     startScreenImageCoords = [0, 0];
                     startScreenImageSize = startScreenAssets['startscreenbg']['dimensions'];
