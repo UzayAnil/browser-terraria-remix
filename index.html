@@ -288,7 +288,7 @@
                                         if (spriteName == sprites['tree1']) {
                                             ctx.drawImage(spriteName, (((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0]) - blockSizeInPixels, blockYCoord - (blockSizeInPixels * 3), (blockSizeInPixels * 3), (blockSizeInPixels * 4));
                                         } else {
-                                            ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels + 1, blockSizeInPixels);
+                                            ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels, blockSizeInPixels);
                                             if (shaderMode == 'blocky-depth-shaders-1' && rowData['blockData'][YCoord]['isSolid']) {
                                                 distanceFromTopSolidBlock = getMaxBlockYCoordForGivenXCoord(blockX + gameData['playerData']['position'][0]) - YCoord;
                                                 previousFillColor = ctx.fillStyle;
@@ -302,7 +302,7 @@
                                                 }
                                                 blockFillColor = 'rgba(0, 0, 0, ' + String(depthDarkness) + ')'
                                                 ctx.fillStyle = blockFillColor;
-                                                ctx.fillRect(((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels + 1, blockSizeInPixels);
+                                                ctx.fillRect(((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels, blockSizeInPixels);
                                                 ctx.fillStyle = previousFillColor;
                                                 distanceFromTopSolidBlock++;
                                             }
