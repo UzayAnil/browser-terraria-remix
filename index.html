@@ -117,7 +117,7 @@
                 var groundLevel = prevoiusGroundLevel;
                 for (xCoord = minXCoord;xCoord <= maxXCoord;xCoord++) {
                     if (!(xCoord in previousTerrainData) && xCoord >= worldXMinBorder && xCoord <= worldXMaxBorder) {
-                        groundLevel = getRandomInt(groundLevel - 1, groundLevel + 1)
+                        groundLevel += getRandomInt(-2, 1)
                         rowData = {
                             'maxHeight':0,
                             'blockData':{
