@@ -1,9 +1,9 @@
 <!--
     TODO:
-        1.] Make it so that the player doesnt turn transparent when the darkness is lowered.
-        2.] Add trees (make them 1 solid image that can be destroyed for items).
-        3.] Make a debug UI.
-        4.] Add an inventory section.
+        1.] Make a debug UI.
+        2.] Add an inventory section.
+        3.] Add a way for the user to save screenshots using the REIMG script on this thread ( https://stackoverflow.com/questions/10673122/how-to-save-canvas-as-an-image-with-canvas-todataurl )
+        4.] Make it so that the trees are randomly rotated, or are different sprites for randomization.
 -->
 <!--
     CONTROLS:
@@ -96,6 +96,10 @@
                     }
                 }
             }
+            function toggleScreenshotMode1() {
+                showCharactersOnScreen = !showCharactersOnScreen;
+                showCrosshairOnScreen = !showCrosshairOnScreen;
+            }
             function generateTerrainChunk(minXCoord, maxXCoord, maxHeight, minHeight, worldXMinBorder, worldXMaxBorder, prevoiusGroundLevel, previousTerrainData) {
                 var groundLevel = prevoiusGroundLevel;
                 for (xCoord = minXCoord;xCoord <= maxXCoord;xCoord++) {
@@ -143,6 +147,12 @@
                                     individualBlockData['blockType'] = blockType;
                                     individualBlockData['isSolid'] = isSolidBlock;
                                     rowData['blockData'][yCoord] = individualBlockData;
+                                } else if (distanceFromGroundLevel == -1 && getRandomInt(0, 6) == 1) {
+                                    blockType = 'tree1';
+                                    isSolidBlock = false;
+                                    individualBlockData['blockType'] = blockType;
+                                    individualBlockData['isSolid'] = isSolidBlock;
+                                    rowData['blockData'][yCoord] = individualBlockData;
                                 }
                             }
                         }
@@ -151,7 +161,9 @@
                 }
                 return previousTerrainData;
             }
-            var gameScreenMode = 'start';
+            var showCrosshairOnScreen = true;
+            var showCharactersOnScreen = true;
+            var gameScreenMode = 'ingame';
             var gridDebugMode = false; //disable for public release
             var infoDebugMode = false; //disable for public release
             var darknessLevel = 0;
@@ -167,7 +179,7 @@
                 'crosshair':document.getElementById('sprites.crosshair'),
                 'tree1':document.getElementById('sprites.treesprite1'),
                 'shrubbery':document.getElementById('sprites.shrubberyoverlaysprite'),
-            }
+            };
             var startScreenAssets = {
                 'startscreenbg':{
                     'image':document.getElementById('sprites.startscreenart'),
@@ -176,7 +188,7 @@
                         'keyCode':83
                     }
                 }
-            }
+            };
             var canvasBGColor = 'rgba(0, 0, 0, 1)';
             var blockSizeInPixels = 50;
             var running = true;
@@ -212,8 +224,8 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 if (gameScreenMode == 'ingame') {
-                    maxAmountOfBlocksOnXAxis = Math.floor(canvas.width / blockSizeInPixels);
-                    maxAmountOfBlocksOnYAxis = Math.floor(canvas.height / blockSizeInPixels);
+                    maxAmountOfBlocksOnXAxis = Math.floor(canvas.width / blockSizeInPixels) + 1;
+                    maxAmountOfBlocksOnYAxis = Math.floor(canvas.height / blockSizeInPixels) + 1;
                     alphaDarkness = 1 - darknessLevel;
                     alphaDarkness = alphaDarkness + (darknessLevel / 2);
                     ctx.globalAlpha = alphaDarkness; //draw sprites below here
@@ -253,8 +265,8 @@
                                     blockYCoord = (centerYCoord - (YCoord * blockSizeInPixels)) + (gameData['playerData']['position'][1] * blockSizeInPixels);
                                     if (blockYCoord < maxAmountOfBlocksOnYAxis * blockSizeInPixels) {
                                         spriteName = sprites[individualData];
-                                        if (spriteName == 'tree1') {
-                                            ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels * 5, blockSizeInPixels * 5);
+                                        if (spriteName == sprites['tree1']) {
+                                            ctx.drawImage(spriteName, (((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0]) - blockSizeInPixels, blockYCoord - (blockSizeInPixels * 3), (blockSizeInPixels * 3), (blockSizeInPixels * 4));
                                         } else {
                                             ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels, blockSizeInPixels);
                                         }
@@ -278,9 +290,11 @@
                         }
                     }
                     ctx.globalAlpha = 1; //draw spirites above here
-                    characterSpriteXCoord = (maxAmountOfBlocksOnXAxis / 2) * blockSizeInPixels;
-                    characterSpriteYCoord = (Math.floor(maxAmountOfBlocksOnYAxis / 2) - 2) * blockSizeInPixels;
-                    ctx.drawImage(sprites['character'], characterSpriteXCoord, characterSpriteYCoord, blockSizeInPixels, blockSizeInPixels * 2);
+                    if (showCharactersOnScreen) {
+                        characterSpriteXCoord = (maxAmountOfBlocksOnXAxis / 2) * blockSizeInPixels;
+                        characterSpriteYCoord = (Math.floor(maxAmountOfBlocksOnYAxis / 2) - 2) * blockSizeInPixels;
+                        ctx.drawImage(sprites['character'], characterSpriteXCoord, characterSpriteYCoord, blockSizeInPixels, blockSizeInPixels * 2);
+                    }
                     if (infoDebugMode) {
                         debugItems = [
                             String('POSITION: ' + String(gameData['playerData']['position'])),
@@ -294,7 +308,9 @@
                             ctx.fillText(String(debugItems[i]), 0, (blockSizeInPixels / 2) + ((blockSizeInPixels / 2) * i));
                         }
                     }
-                    ctx.drawImage(sprites['crosshair'], mouseCoords[0] - (blockSizeInPixels / 2), mouseCoords[1] - (blockSizeInPixels / 2), blockSizeInPixels, blockSizeInPixels);
+                    if (showCrosshairOnScreen) {
+                        ctx.drawImage(sprites['crosshair'], mouseCoords[0] - (blockSizeInPixels / 2), mouseCoords[1] - (blockSizeInPixels / 2), blockSizeInPixels, blockSizeInPixels);
+                    }
                     isTouchingBlock = getIsTouchingBlock();
                     if (gameData['playerData']['velocities']['x'] > 0.2) {
                         gameData['playerData']['velocities']['x'] -= 0.1;
