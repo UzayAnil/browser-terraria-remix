@@ -113,11 +113,16 @@
                 showCharactersOnScreen = !showCharactersOnScreen;
                 showCrosshairOnScreen = !showCrosshairOnScreen;
             }
-            function generateTerrainChunk(minXCoord, maxXCoord, maxHeight, minHeight, worldXMinBorder, worldXMaxBorder, prevoiusGroundLevel, previousTerrainData) {
+            function generateTerrainChunk(minXCoord, maxXCoord, maxHeight, minHeight, worldXMinBorder, worldXMaxBorder, prevoiusGroundLevel, previousTerrainData, maxMountainHeight, minValleyDepth) {
                 var groundLevel = prevoiusGroundLevel;
                 for (xCoord = minXCoord;xCoord <= maxXCoord;xCoord++) {
                     if (!(xCoord in previousTerrainData) && xCoord >= worldXMinBorder && xCoord <= worldXMaxBorder) {
                         groundLevel += getRandomInt(-2, 1)
+                        if (groundLevel < minValleyDepth) {
+                            groundLevel = minValleyDepth;
+                        } else if (groundLevel > maxMountainHeight) {
+                            groundLevel = maxMountainHeight;
+                        }
                         rowData = {
                             'maxHeight':0,
                             'blockData':{
@@ -269,7 +274,7 @@
                         } catch (e) {
                             prevoiusGroundLevel = 0;
                         }
-                        gameData['terrainData'] = generateTerrainChunk(Math.floor(gameData['playerData']['position'][0]), Math.floor(gameData['playerData']['position'][0]) + maxAmountOfBlocksOnXAxis, gameData['boundaryData']['yTopBoundary'], gameData['boundaryData']['yBottomBoundary'], gameData['boundaryData']['xLeftBoundary'], gameData['boundaryData']['xRightBoundary'], prevoiusGroundLevel, gameData['terrainData']);
+                        gameData['terrainData'] = generateTerrainChunk(Math.floor(gameData['playerData']['position'][0]), Math.floor(gameData['playerData']['position'][0]) + maxAmountOfBlocksOnXAxis, gameData['boundaryData']['yTopBoundary'], gameData['boundaryData']['yBottomBoundary'], gameData['boundaryData']['xLeftBoundary'], gameData['boundaryData']['xRightBoundary'], prevoiusGroundLevel, gameData['terrainData'], gameData['boundaryData']['yTopBoundary'] - 10, gameData['boundaryData']['yBottomBoundary'] + 10);
                     } 
                     //ABOVE HERE IS A MESS - IM SORRY IF YOU ARE THE ONE WHO WAS CALLED TO REWRITE IT
                     positionFloatingPointLeftovers = [(gameData['playerData']['position'][0] - Math.floor(gameData['playerData']['position'][0])), (gameData['playerData']['position'][1] - Math.floor(gameData['playerData']['position'][1]))];
