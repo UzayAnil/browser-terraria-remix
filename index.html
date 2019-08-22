@@ -1,9 +1,9 @@
 <!--
     TODO:
-        1.] Make a debug UI.
-        2.] Add an inventory section.
-        3.] Add a way for the user to save screenshots using the REIMG script on this thread ( https://stackoverflow.com/questions/10673122/how-to-save-canvas-as-an-image-with-canvas-todataurl )
-        4.] Make it so that the trees are randomly rotated, or are different sprites for randomization.
+        1.] Add an inventory section.
+        2.] Add a way for the user to save screenshots using the REIMG script on this thread ( https://stackoverflow.com/questions/10673122/how-to-save-canvas-as-an-image-with-canvas-todataurl )
+        3.] Make it so that the trees are randomly rotated, or are different sprites for randomization.
+        4.] Add buttons so that its playable on mobile devices.
 -->
 <!--
     CONTROLS:
@@ -268,7 +268,7 @@
                                         if (spriteName == sprites['tree1']) {
                                             ctx.drawImage(spriteName, (((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0]) - blockSizeInPixels, blockYCoord - (blockSizeInPixels * 3), (blockSizeInPixels * 3), (blockSizeInPixels * 4));
                                         } else {
-                                            ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels, blockSizeInPixels);
+                                            ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels + 1, blockSizeInPixels);
                                         }
                                     }
                                 }
