@@ -29,7 +29,7 @@
             .hiddenImage{display:none;}
         </style>
     </head>
-    <body onkeydown = 'handleKeyDown(event.keyCode);'>
+    <body onkeydown = 'handleKeyDown(event.keyCode);' oncontextmenu = 'return false;'>
         <img src = './utils/ingame-images/character-sprite.png' id = 'sprites.charactersprite' class = 'daylightAffectedSprite gameCharacterSprite hiddenImage'/>
         <img src = './utils/ingame-images/dirt-block.png' id = 'sprites.dirtblocksprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
         <img src = './utils/ingame-images/error-block.png' id = 'sprites.errorblocksprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
