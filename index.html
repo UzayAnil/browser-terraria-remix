@@ -44,6 +44,7 @@
         <img src = './utils/ingame-images/crosshair-block-selection-outline.png' id = 'sprites.crosshairselectionindicator' class = 'hiddenImage'/>
         <img src = './utils/ingame-images/inventory-slot-background.png' id = 'sprites.inventoryslotbg' class = 'hiddenImage'/>
         <img src = './utils/ingame-images/inventory-slot-selection-indicator.png' id = 'sprites.inventoryslotselected' class = 'hiddenImage'/>
+        <img src = './utils/ingame-images/cloud1.png' id = 'sprites.cloud1' class = 'daylightAffectedSprite hiddenImage'/>
         <canvas id = 'gamecanvas'><p>Error showing canvas.</p></canvas>
         <script>
             console.log('Press the "[" button to toggle the debug overlay.')
@@ -186,9 +187,14 @@
             }
             function generateNewClouds(amount) {
                 var clouds = [];
+                var cloudTypes = ['cloud1'];
                 for (i = 0;i < amount;i++) {
+                    var sizeModifier = getRandomInt(1, 3)
                     var cloudData = {
-
+                        'position':[getRandomInt(-100, 200), getRandomInt(0, 50)],
+                        'cloudType':cloudTypes[getRandomInt(0, cloudTypes.length - 1)],
+                        'size':[(3 * sizeModifier), (1 * sizeModifier)],
+                        'opacity':(getRandomInt(20, 100) / 100)
                     };
                     clouds.push(cloudData);
                 }
@@ -222,7 +228,8 @@
                 'shrubbery':document.getElementById('sprites.shrubberyoverlaysprite'),
                 'selectionindicator':document.getElementById('sprites.crosshairselectionindicator'),
                 'inventoryslot':document.getElementById('sprites.inventoryslotbg'),
-                'inventoryslotselected':document.getElementById('sprites.inventoryslotselected')
+                'inventoryslotselected':document.getElementById('sprites.inventoryslotselected'),
+                'cloud1':document.getElementById('sprites.cloud1')
             };
             var startScreenAssets = {
                 'startscreenbg':{
@@ -260,7 +267,7 @@
                 },
                 'selectedSlot':0
             };
-            var clouds = generateNewClouds(2);
+            var clouds = generateNewClouds(20);
             var mouseCoords = [Math.round(canvas.width / 2), Math.round(canvas.height / 2)];
             ctx.canvas.addEventListener('mousemove', function(event){
                 mouseCoords = [event.clientX - ctx.canvas.offsetLeft, event.clientY - ctx.canvas.offsetTop];
@@ -304,6 +311,17 @@
                         gameData['terrainData'] = generateTerrainChunk(Math.floor(gameData['playerData']['position'][0]), Math.floor(gameData['playerData']['position'][0]) + maxAmountOfBlocksOnXAxis, gameData['boundaryData']['yTopBoundary'], gameData['boundaryData']['yBottomBoundary'], gameData['boundaryData']['xLeftBoundary'], gameData['boundaryData']['xRightBoundary'], prevoiusGroundLevel, gameData['terrainData'], gameData['boundaryData']['generationMaxHeight'], gameData['boundaryData']['generationMinHeight']);
                     } 
                     //ABOVE HERE IS A MESS - IM SORRY IF YOU ARE THE ONE WHO WAS CALLED TO REWRITE IT
+                    for (cloud = 0;cloud < clouds.length;cloud++) {
+                        cloudData = clouds[cloud];
+                        previousGlobalAlpha = ctx.globalAlpha;
+                        ctx.globalAlpha = cloudData['opacity'];
+                        offsetX = (gameData['playerData']['position'][0] / gameData['boundaryData']['xRightBoundary']) * canvas.width
+                        if (offsetX == Infinity || offsetX == -Infinity || offsetX == NaN) {
+                            offsetX = 0;
+                        }
+                        ctx.drawImage(sprites[cloudData['cloudType']], ((cloudData['position'][0] / 100) * canvas.width) - offsetX, ((cloudData['position'][1] / 100) * canvas.height), cloudData['size'][0] * blockSizeInPixels, cloudData['size'][1] * blockSizeInPixels);
+                        ctx.globalAlpha = previousGlobalAlpha;
+                    }
                     positionFloatingPointLeftovers = [(gameData['playerData']['position'][0] - Math.floor(gameData['playerData']['position'][0])), (gameData['playerData']['position'][1] - Math.floor(gameData['playerData']['position'][1]))];
                     characterSpriteXCoord = Math.ceil((maxAmountOfBlocksOnXAxis / 2));
                     for (blockX = -characterSpriteXCoord + positionFloatingPointLeftovers[0] - 1;blockX < maxAmountOfBlocksOnXAxis - characterSpriteXCoord;blockX++) {
