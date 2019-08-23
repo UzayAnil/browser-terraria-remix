@@ -42,6 +42,8 @@
         <img src = './utils/ingame-images/shrubbery-overlay.png' id = 'sprites.shrubberyoverlaysprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
         <img src = './utils/ingame-images/startscreen-art.png' id = 'sprites.startscreenart' class = 'hiddenImage'/>
         <img src = './utils/ingame-images/crosshair-block-selection-outline.png' id = 'sprites.crosshairselectionindicator' class = 'hiddenImage'/>
+        <img src = './utils/ingame-images/inventory-slot-background.png' id = 'sprites.inventoryslotbg' class = 'hiddenImage'/>
+        <img src = './utils/ingame-images/inventory-slot-selection-indicator.png' id = 'sprites.inventoryslotselected' class = 'hiddenImage'/>
         <canvas id = 'gamecanvas'><p>Error showing canvas.</p></canvas>
         <script>
             console.log('Press the "[" button to toggle the debug overlay.')
@@ -111,9 +113,10 @@
                     }
                 }
             }
-            function toggleScreenshotMode1() {
-                showCharactersOnScreen = !showCharactersOnScreen;
-                showCrosshairOnScreen = !showCrosshairOnScreen;
+            function toggleScreenshotMode1(mode) {
+                showCharactersOnScreen = mode;
+                showCrosshairOnScreen = mode;
+                showInventoryOnScreen = mode;
             }
             function generateTerrainChunk(minXCoord, maxXCoord, maxHeight, minHeight, worldXMinBorder, worldXMaxBorder, prevoiusGroundLevel, previousTerrainData, maxMountainHeight, minValleyDepth) {
                 var groundLevel = prevoiusGroundLevel;
@@ -188,6 +191,7 @@
                     'minDarkness':0.95,
                 }
             };
+            var showInventoryOnScreen = true;
             var showCrosshairOnScreen = true;
             var showCharactersOnScreen = true;
             var gameScreenMode = 'ingame';
@@ -206,7 +210,9 @@
                 'crosshair':document.getElementById('sprites.crosshair'),
                 'tree1':document.getElementById('sprites.treesprite1'),
                 'shrubbery':document.getElementById('sprites.shrubberyoverlaysprite'),
-                'selectionindicator':document.getElementById('sprites.crosshairselectionindicator')
+                'selectionindicator':document.getElementById('sprites.crosshairselectionindicator'),
+                'inventoryslot':document.getElementById('sprites.inventoryslotbg'),
+                'inventoryslotselected':document.getElementById('sprites.inventoryslotselected')
             };
             var startScreenAssets = {
                 'startscreenbg':{
@@ -236,6 +242,11 @@
                     'yTopBoundary':30,
                     'yBottomBoundary':-30
                 }
+            };
+            var inventory = {
+                'items':{
+                },
+                'selectedSlot':0
             };
             var mouseCoords = [Math.round(canvas.width / 2), Math.round(canvas.height / 2)];
             ctx.canvas.addEventListener('mousemove', function(event){
@@ -363,6 +374,17 @@
                             blockSizeInPixels * (Math.floor(mouseCoords[1] / blockSizeInPixels) - positionFloatingPointLeftovers[1]),
                         ];
                         ctx.drawImage(sprites['selectionindicator'], selectionIndicatorCoords[0], selectionIndicatorCoords[1], blockSizeInPixels, blockSizeInPixels);
+                    }
+                    inventoryKeys = Object.keys(inventory['items']);
+                    inventorySlotSize = blockSizeInPixels * 1.5;
+                    if (showInventoryOnScreen) {
+                        for (slot = 0;slot < inventoryKeys.length;slot++) {
+                            ctx.drawImage(sprites['inventoryslot'], canvas.width - (inventorySlotSize * (slot + 2)), inventorySlotSize, inventorySlotSize, inventorySlotSize);
+                            ctx.drawImage(sprites[inventoryKeys[slot]], canvas.width - (inventorySlotSize * (slot + 2)) + ((inventorySlotSize / 100) * 16), inventorySlotSize + ((inventorySlotSize / 100) * 16), inventorySlotSize / 1.5, inventorySlotSize / 1.5);
+                            ctx.fillStyle = 'white';
+                            ctx.font = String((blockSizeInPixels / 3)) + 'px __local__pixelsplitter__';
+                            ctx.fillText(String(inventory['items'][inventoryKeys[slot]]), canvas.width - (inventorySlotSize * (slot + 2)), inventorySlotSize + (blockSizeInPixels / 3))
+                        }
                     }
                     isTouchingBlock = getIsTouchingBlock();
                     if (gameData['playerData']['velocities']['x'] > 0.2) {
