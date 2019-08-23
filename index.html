@@ -27,9 +27,10 @@
             .gameCharacterSprite{width:20px;height:40px;}
             #gamecanvas{background-color:#91f8ff;position:absolute;top:0px;left:0px;width:100%;height:100%;}
             .hiddenImage{display:none;}
+            .nocursor{cursor:none;}
         </style>
     </head>
-    <body onkeydown = 'handleKeyDown(event.keyCode);' oncontextmenu = 'return false;'>
+    <body onkeydown = 'handleKeyDown(event.keyCode);' oncontextmenu = 'return false;' class = 'nocursor'>
         <img src = './utils/ingame-images/character-sprite.png' id = 'sprites.charactersprite' class = 'daylightAffectedSprite gameCharacterSprite hiddenImage'/>
         <img src = './utils/ingame-images/dirt-block.png' id = 'sprites.dirtblocksprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
         <img src = './utils/ingame-images/error-block.png' id = 'sprites.errorblocksprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
