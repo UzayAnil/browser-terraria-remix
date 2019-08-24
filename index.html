@@ -1,9 +1,13 @@
 <!--
     TODO:
-        1.] Add an inventory section.
-        2.] Add a way for the user to save screenshots using the REIMG script on this thread ( https://stackoverflow.com/questions/10673122/how-to-save-canvas-as-an-image-with-canvas-todataurl )
-        3.] Make it so that the trees are randomly rotated, or are different sprites for randomization.
-        4.] Add buttons so that its playable on mobile devices.
+        [ ] Add an inventory section.
+        [ ] Add a way for the user to save screenshots using the REIMG script on this thread ( https://stackoverflow.com/questions/10673122/how-to-save-canvas-as-an-image-with-canvas-todataurl ).
+        [ ] Make it so that the trees are randomly rotated, or are different sprites for randomization.
+        [ ] Add buttons so that its playable on mobile devices.
+        [ ] Add a credit screen.
+        [ ] Add caves.
+        [ ] Fix the gravity.
+        [ ] Make a loading screen where it loads the entire world and has a progress bar.
 -->
 <!--
     CONTROLS:
@@ -204,7 +208,7 @@
                 for (i = 0;i < amount;i++) {
                     var sizeModifier = getRandomInt(1, 3)
                     var cloudData = {
-                        'position':[getRandomInt(-100, 200), getRandomInt(0, 50)],
+                        'position':[getRandomInt(0, 200), getRandomInt(0, 50)],
                         'cloudType':cloudTypes[getRandomInt(0, cloudTypes.length - 1)],
                         'size':[(3 * sizeModifier), (1 * sizeModifier)],
                         'opacity':(getRandomInt(20, 100) / 100)
@@ -223,7 +227,8 @@
             var showInventoryOnScreen = true;
             var showCrosshairOnScreen = true;
             var showCharactersOnScreen = true;
-            var gameScreenMode = 'ingame';
+            var gameScreenMode = 'loadingterraingen';
+            var terrainGenProgress = 0;
             var gridDebugMode = false; //disable for public release
             var infoDebugMode = false; //disable for public release
             var darknessLevel = 0;
@@ -280,6 +285,7 @@
                     'generationMaxHeight':10,
                 }
             };
+            gameData['playerData']['position'][0] = Math.floor(gameData['boundaryData']['xRightBoundary'] / 2);
             var inventory = {
                 'items':{
                 },
@@ -300,142 +306,124 @@
                 ctx.imageSmoothingEnabled = false;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                if (gameScreenMode == 'ingame') {
-                    maxAmountOfBlocksOnXAxis = Math.floor(canvas.width / blockSizeInPixels) + 1;
-                    maxAmountOfBlocksOnYAxis = Math.floor(canvas.height / blockSizeInPixels) + 1;
-                    alphaDarkness = 1 - darknessLevel;
-                    alphaDarkness = alphaDarkness + (darknessLevel / 2);
-                    ctx.globalAlpha = alphaDarkness; //draw sprites below here
-                    //BELOW HERE IS A MESS - IM SORRY IF YOU ARE THE ONE WHO WAS CALLED TO REWRITE IT
-                    if (!(Math.floor(gameData['playerData']['position'][0]) + maxAmountOfBlocksOnXAxis in gameData['terrainData'])) {
-                        terrainData = Object.keys(gameData['terrainData']);
-                        try {
-                            blockHeightsForMaxCoord = gameData['terrainData'];
-                            blockHeightsForMaxCoord = Object.keys(blockHeightsForMaxCoord);
-                            tmpList1 = [];
-                            for (key = 0;key < blockHeightsForMaxCoord.length;key++) {
-                                tmpList1.push(parseInt(blockHeightsForMaxCoord[key]));
-                            }
-                            blockHeightsForMaxCoord = Math.max.apply(null, tmpList1);
-                            columnData = Object.keys(gameData['terrainData'][blockHeightsForMaxCoord]['blockData']);
-                            tmpList2 = [];
-                            for (key = 0;key < columnData.length;key++) {
-                                tmpList2.push(parseInt(columnData[key]));
-                            }
-                            prevoiusGroundLevel = Math.max.apply(null, tmpList2);
-                        } catch (e) {
-                            prevoiusGroundLevel = 0;
-                        }
-                        gameData['terrainData'] = generateTerrainChunk(Math.floor(gameData['playerData']['position'][0]), Math.floor(gameData['playerData']['position'][0]) + maxAmountOfBlocksOnXAxis, gameData['boundaryData']['yTopBoundary'], gameData['boundaryData']['yBottomBoundary'], gameData['boundaryData']['xLeftBoundary'], gameData['boundaryData']['xRightBoundary'], prevoiusGroundLevel, gameData['terrainData'], gameData['boundaryData']['generationMaxHeight'], gameData['boundaryData']['generationMinHeight']);
-                    } 
-                    //ABOVE HERE IS A MESS - IM SORRY IF YOU ARE THE ONE WHO WAS CALLED TO REWRITE IT
-                    //ctx.drawImage(sprites['sun'], canvas.width - (canvas.width / 10) - ((gameData['playerData']['position'][0] / gameData['boundaryData']['xRightBoundary']) * canvas.width), canvas.height / 5, blockSizeInPixels * 3, blockSizeInPixels * 3);
-                    for (cloud = 0;cloud < clouds.length;cloud++) {
-                        cloudData = clouds[cloud];
-                        previousGlobalAlpha = ctx.globalAlpha;
-                        ctx.globalAlpha = cloudData['opacity'];
-                        offsetX = (gameData['playerData']['position'][0] / gameData['boundaryData']['xRightBoundary']) * canvas.width;
-                        if (offsetX == Infinity || offsetX == -Infinity || offsetX == NaN) {
-                            offsetX = 0;
-                        }
-                        ctx.drawImage(sprites[cloudData['cloudType']], ((cloudData['position'][0] / 100) * canvas.width) - offsetX, ((cloudData['position'][1] / 100) * canvas.height), cloudData['size'][0] * blockSizeInPixels, cloudData['size'][1] * blockSizeInPixels);
-                        ctx.globalAlpha = previousGlobalAlpha;
+                maxAmountOfBlocksOnXAxis = Math.floor(canvas.width / blockSizeInPixels) + 1;
+                maxAmountOfBlocksOnYAxis = Math.floor(canvas.height / blockSizeInPixels) + 1;
+                alphaDarkness = 1 - darknessLevel;
+                alphaDarkness = alphaDarkness + (darknessLevel / 2);
+                ctx.globalAlpha = alphaDarkness; //draw sprites below here
+                if (gameScreenMode != 'ingame') {
+                    toggleScreenshotMode1(false);
+                } else {
+                    toggleScreenshotMode1(true);
+                }
+                //ctx.drawImage(sprites['sun'], canvas.width - (canvas.width / 10) - ((gameData['playerData']['position'][0] / gameData['boundaryData']['xRightBoundary']) * canvas.width), canvas.height / 5, blockSizeInPixels * 3, blockSizeInPixels * 3);
+                for (cloud = 0;cloud < clouds.length;cloud++) {
+                    cloudData = clouds[cloud];
+                    previousGlobalAlpha = ctx.globalAlpha;
+                    ctx.globalAlpha = cloudData['opacity'];
+                    offsetX = (gameData['playerData']['position'][0] / gameData['boundaryData']['xRightBoundary']) * canvas.width;
+                    if (offsetX == Infinity || offsetX == -Infinity || offsetX == NaN) {
+                        offsetX = 0;
                     }
-                    positionFloatingPointLeftovers = [(gameData['playerData']['position'][0] - Math.floor(gameData['playerData']['position'][0])), (gameData['playerData']['position'][1] - Math.floor(gameData['playerData']['position'][1]))];
-                    characterSpriteXCoord = Math.ceil((maxAmountOfBlocksOnXAxis / 2));
-                    for (blockX = -characterSpriteXCoord + positionFloatingPointLeftovers[0] - 1;blockX < maxAmountOfBlocksOnXAxis - characterSpriteXCoord;blockX++) {
-                        try {
-                            rowData = gameData['terrainData'][Math.floor(blockX + gameData['playerData']['position'][0])];
-                            drewCharacter = false;
-                            if (rowData != undefined) {
-                                for (YCoord in rowData['blockData']) {
-                                    centerYCoord = Math.floor(maxAmountOfBlocksOnYAxis / 2) * blockSizeInPixels;
-                                    individualData = rowData['blockData'][YCoord]['blockType'];
-                                    blockYCoord = (centerYCoord - (YCoord * blockSizeInPixels)) + (gameData['playerData']['position'][1] * blockSizeInPixels);
-                                    if (blockYCoord < maxAmountOfBlocksOnYAxis * blockSizeInPixels) {
-                                        spriteName = sprites[individualData];
-                                        if (spriteName == sprites['tree1']) {
-                                            ctx.drawImage(spriteName, (((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0]) - blockSizeInPixels, blockYCoord - (blockSizeInPixels * 3), (blockSizeInPixels * 3), (blockSizeInPixels * 4));
-                                        } else {
-                                            ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels, blockSizeInPixels);
-                                            if (shaderMode == 'blocky-depth-shaders-1' && rowData['blockData'][YCoord]['isSolid']) {
-                                                distanceFromTopSolidBlock = getMaxBlockYCoordForGivenXCoord(blockX + gameData['playerData']['position'][0]) - YCoord;
-                                                previousFillColor = ctx.fillStyle;
-                                                depthDarkness = 0;
-                                                shaderData = shaderPresets[shaderMode];
-                                                darknessStep = shaderData['minDarkness'] / shaderData['maxLightPenetrationDepth'];
-                                                if (distanceFromTopSolidBlock <= shaderData['maxLightPenetrationDepth']) {
-                                                    depthDarkness = darknessStep * distanceFromTopSolidBlock;
-                                                } else if (distanceFromTopSolidBlock > shaderData['maxLightPenetrationDepth']) {
-                                                    depthDarkness = shaderData['minDarkness'];
-                                                }
-                                                blockFillColor = 'rgba(0, 0, 0, ' + String(depthDarkness) + ')'
-                                                ctx.fillStyle = blockFillColor;
-                                                ctx.fillRect(((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels, blockSizeInPixels);
-                                                ctx.fillStyle = previousFillColor;
-                                                distanceFromTopSolidBlock++;
+                    ctx.drawImage(sprites[cloudData['cloudType']], ((cloudData['position'][0] / 100) * canvas.width) - offsetX, ((cloudData['position'][1] / 100) * canvas.height), cloudData['size'][0] * blockSizeInPixels, cloudData['size'][1] * blockSizeInPixels);
+                    ctx.globalAlpha = previousGlobalAlpha;
+                }
+                positionFloatingPointLeftovers = [(gameData['playerData']['position'][0] - Math.floor(gameData['playerData']['position'][0])), (gameData['playerData']['position'][1] - Math.floor(gameData['playerData']['position'][1]))];
+                characterSpriteXCoord = Math.ceil((maxAmountOfBlocksOnXAxis / 2));
+                for (blockX = -characterSpriteXCoord + positionFloatingPointLeftovers[0] - 1;blockX < maxAmountOfBlocksOnXAxis - characterSpriteXCoord;blockX++) {
+                    try {
+                        rowData = gameData['terrainData'][Math.floor(blockX + gameData['playerData']['position'][0])];
+                        drewCharacter = false;
+                        if (rowData != undefined) {
+                            for (YCoord in rowData['blockData']) {
+                                centerYCoord = Math.floor(maxAmountOfBlocksOnYAxis / 2) * blockSizeInPixels;
+                                individualData = rowData['blockData'][YCoord]['blockType'];
+                                blockYCoord = (centerYCoord - (YCoord * blockSizeInPixels)) + (gameData['playerData']['position'][1] * blockSizeInPixels);
+                                if (blockYCoord < maxAmountOfBlocksOnYAxis * blockSizeInPixels) {
+                                    spriteName = sprites[individualData];
+                                    if (spriteName == sprites['tree1']) {
+                                        ctx.drawImage(spriteName, (((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0]) - blockSizeInPixels, blockYCoord - (blockSizeInPixels * 3), (blockSizeInPixels * 3), (blockSizeInPixels * 4));
+                                    } else {
+                                        ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels, blockSizeInPixels);
+                                        if (shaderMode == 'blocky-depth-shaders-1' && rowData['blockData'][YCoord]['isSolid']) {
+                                            distanceFromTopSolidBlock = getMaxBlockYCoordForGivenXCoord(blockX + gameData['playerData']['position'][0]) - YCoord;
+                                            previousFillColor = ctx.fillStyle;
+                                            depthDarkness = 0;
+                                            shaderData = shaderPresets[shaderMode];
+                                            darknessStep = shaderData['minDarkness'] / shaderData['maxLightPenetrationDepth'];
+                                            if (distanceFromTopSolidBlock <= shaderData['maxLightPenetrationDepth']) {
+                                                depthDarkness = darknessStep * distanceFromTopSolidBlock;
+                                            } else if (distanceFromTopSolidBlock > shaderData['maxLightPenetrationDepth']) {
+                                                depthDarkness = shaderData['minDarkness'];
                                             }
+                                            blockFillColor = 'rgba(0, 0, 0, ' + String(depthDarkness) + ')'
+                                            ctx.fillStyle = blockFillColor;
+                                            ctx.fillRect(((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels, blockSizeInPixels);
+                                            ctx.fillStyle = previousFillColor;
+                                            distanceFromTopSolidBlock++;
                                         }
-                                        distanceFromTopSolidBlock++;
                                     }
+                                    distanceFromTopSolidBlock++;
                                 }
                             }
-                        } catch(e) {
                         }
-                        if (gridDebugMode) {
-                            ctx.strokeStyle = '#ffb900';
+                    } catch(e) {
+                    }
+                    if (gridDebugMode) {
+                        ctx.strokeStyle = '#ffb900';
+                        ctx.beginPath();
+                        ctx.moveTo((blockX + characterSpriteXCoord) * blockSizeInPixels, 0);
+                        ctx.lineTo((blockX + characterSpriteXCoord) * blockSizeInPixels, screen.height);
+                        ctx.stroke();
+                        for (blockY = 0 + positionFloatingPointLeftovers[1];blockY <= maxAmountOfBlocksOnYAxis;blockY++) {
                             ctx.beginPath();
-                            ctx.moveTo((blockX + characterSpriteXCoord) * blockSizeInPixels, 0);
-                            ctx.lineTo((blockX + characterSpriteXCoord) * blockSizeInPixels, screen.height);
+                            ctx.moveTo(0, (blockY * blockSizeInPixels));
+                            ctx.lineTo(screen.width, blockY * blockSizeInPixels);
                             ctx.stroke();
-                            for (blockY = 0 + positionFloatingPointLeftovers[1];blockY <= maxAmountOfBlocksOnYAxis;blockY++) {
-                                ctx.beginPath();
-                                ctx.moveTo(0, (blockY * blockSizeInPixels));
-                                ctx.lineTo(screen.width, blockY * blockSizeInPixels);
-                                ctx.stroke();
-                            }
                         }
                     }
-                    ctx.globalAlpha = 1; //draw spirites above here
-                    if (showCharactersOnScreen) {
-                        characterSpriteXCoord = (maxAmountOfBlocksOnXAxis / 2) * blockSizeInPixels;
-                        characterSpriteYCoord = (Math.floor(maxAmountOfBlocksOnYAxis / 2) - 2) * blockSizeInPixels;
-                        ctx.drawImage(sprites['character'], characterSpriteXCoord, characterSpriteYCoord, blockSizeInPixels, blockSizeInPixels * 2);
+                }
+                ctx.globalAlpha = 1; //draw spirites above here
+                if (showCharactersOnScreen) {
+                    characterSpriteXCoord = (maxAmountOfBlocksOnXAxis / 2) * blockSizeInPixels;
+                    characterSpriteYCoord = (Math.floor(maxAmountOfBlocksOnYAxis / 2) - 2) * blockSizeInPixels;
+                    ctx.drawImage(sprites['character'], characterSpriteXCoord, characterSpriteYCoord, blockSizeInPixels, blockSizeInPixels * 2);
+                }
+                if (infoDebugMode) {
+                    debugItems = [
+                        String('POSITION: ' + String(gameData['playerData']['position'])),
+                        String('VELOCITY: ' + String(gameData['playerData']['velocities']['x']) + ',' + String(gameData['playerData']['velocities']['y'])),
+                        String('TOUCHING-BLOCK: ' + String(getIsTouchingBlock())),
+                        String('CURRENT-LOOP-START: ' + String(startTime)),
+                        String('PREVIOUS-LOOP-END: ' + String(endTime)),
+                        String('LOOP-START-TO-END-TIME: ' + String(lastFps))
+                    ];
+                    for (i = 0;i < debugItems.length;i++) {
+                        ctx.fillStyle = 'black';
+                        ctx.font = String((blockSizeInPixels / 2)) + 'px __local__pixelsplitter__';
+                        ctx.fillText(String(debugItems[i]), 0, (blockSizeInPixels / 2) + ((blockSizeInPixels / 2) * i));
                     }
-                    if (infoDebugMode) {
-                        debugItems = [
-                            String('POSITION: ' + String(gameData['playerData']['position'])),
-                            String('VELOCITY: ' + String(gameData['playerData']['velocities']['x']) + ',' + String(gameData['playerData']['velocities']['y'])),
-                            String('TOUCHING-BLOCK: ' + String(getIsTouchingBlock())),
-                            String('CURRENT-LOOP-START: ' + String(startTime)),
-                            String('PREVIOUS-LOOP-END: ' + String(endTime)),
-                            String('LOOP-START-TO-END-TIME: ' + String(lastFps))
-                        ];
-                        for (i = 0;i < debugItems.length;i++) {
-                            ctx.fillStyle = 'black';
-                            ctx.font = String((blockSizeInPixels / 2)) + 'px __local__pixelsplitter__';
-                            ctx.fillText(String(debugItems[i]), 0, (blockSizeInPixels / 2) + ((blockSizeInPixels / 2) * i));
-                        }
+                }
+                if (showCrosshairOnScreen) {
+                    ctx.drawImage(sprites['crosshair'], mouseCoords[0] - (blockSizeInPixels / 2), mouseCoords[1] - (blockSizeInPixels / 2), blockSizeInPixels, blockSizeInPixels);
+                    selectionIndicatorCoords = [
+                        blockSizeInPixels * (Math.floor(mouseCoords[0] / blockSizeInPixels) - positionFloatingPointLeftovers[0]),
+                        blockSizeInPixels * (Math.floor(mouseCoords[1] / blockSizeInPixels) + positionFloatingPointLeftovers[1]),
+                    ];
+                    ctx.drawImage(sprites['selectionindicator'], selectionIndicatorCoords[0], selectionIndicatorCoords[1], blockSizeInPixels, blockSizeInPixels);
+                }
+                inventoryKeys = Object.keys(inventory['items']);
+                inventorySlotSize = blockSizeInPixels * 1.5;
+                if (showInventoryOnScreen) {
+                    for (slot = 0;slot < inventoryKeys.length;slot++) {
+                        ctx.drawImage(sprites['inventoryslot'], canvas.width - (inventorySlotSize * (slot + 2)), inventorySlotSize, inventorySlotSize, inventorySlotSize);
+                        ctx.drawImage(sprites[inventoryKeys[slot]], canvas.width - (inventorySlotSize * (slot + 2)) + ((inventorySlotSize / 100) * 16), inventorySlotSize + ((inventorySlotSize / 100) * 16), inventorySlotSize / 1.5, inventorySlotSize / 1.5);
+                        ctx.fillStyle = 'white';
+                        ctx.font = String((blockSizeInPixels / 3)) + 'px __local__pixelsplitter__';
+                        ctx.fillText(String(inventory['items'][inventoryKeys[slot]]), canvas.width - (inventorySlotSize * (slot + 2)), inventorySlotSize + (blockSizeInPixels / 3))
                     }
-                    if (showCrosshairOnScreen) {
-                        ctx.drawImage(sprites['crosshair'], mouseCoords[0] - (blockSizeInPixels / 2), mouseCoords[1] - (blockSizeInPixels / 2), blockSizeInPixels, blockSizeInPixels);
-                        selectionIndicatorCoords = [
-                            blockSizeInPixels * (Math.floor(mouseCoords[0] / blockSizeInPixels) - positionFloatingPointLeftovers[0]),
-                            blockSizeInPixels * (Math.floor(mouseCoords[1] / blockSizeInPixels) + positionFloatingPointLeftovers[1]),
-                        ];
-                        ctx.drawImage(sprites['selectionindicator'], selectionIndicatorCoords[0], selectionIndicatorCoords[1], blockSizeInPixels, blockSizeInPixels);
-                    }
-                    inventoryKeys = Object.keys(inventory['items']);
-                    inventorySlotSize = blockSizeInPixels * 1.5;
-                    if (showInventoryOnScreen) {
-                        for (slot = 0;slot < inventoryKeys.length;slot++) {
-                            ctx.drawImage(sprites['inventoryslot'], canvas.width - (inventorySlotSize * (slot + 2)), inventorySlotSize, inventorySlotSize, inventorySlotSize);
-                            ctx.drawImage(sprites[inventoryKeys[slot]], canvas.width - (inventorySlotSize * (slot + 2)) + ((inventorySlotSize / 100) * 16), inventorySlotSize + ((inventorySlotSize / 100) * 16), inventorySlotSize / 1.5, inventorySlotSize / 1.5);
-                            ctx.fillStyle = 'white';
-                            ctx.font = String((blockSizeInPixels / 3)) + 'px __local__pixelsplitter__';
-                            ctx.fillText(String(inventory['items'][inventoryKeys[slot]]), canvas.width - (inventorySlotSize * (slot + 2)), inventorySlotSize + (blockSizeInPixels / 3))
-                        }
-                    }
+                }
+                if (gameScreenMode == 'ingame') {
                     isTouchingBlock = getIsTouchingBlock();
                     if (gameData['playerData']['velocities']['x'] > 0.2) {
                         gameData['playerData']['velocities']['x'] -= 0.1;
@@ -458,19 +446,62 @@
                     }
                     gameData['playerData']['position'][0] += gameData['playerData']['velocities']['x'];
                     gameData['playerData']['position'][1] += gameData['playerData']['velocities']['y'];
-                    endTime = performance.now();
-                    lastFps = (endTime - startTime) / 1000;
-                } else if (gameScreenMode == 'start') {
-                    startScreenImageCoords = [0, 0];
-                    startScreenImageSize = startScreenAssets['startscreenbg']['dimensions'];
-                    screenAspectRatio = startScreenImageSize[0] / startScreenImageSize[1];
-                    startScreenImageSize[1] = canvas.height;
-                    startScreenImageSize[0] = canvas.height * screenAspectRatio;
-                    startScreenImageCoords[0] = (canvas.width - startScreenImageSize[0]) / 2;
-                    ctx.drawImage(startScreenAssets['startscreenbg']['image'], startScreenImageCoords[0], startScreenImageCoords[1], startScreenImageSize[0], startScreenImageSize[1]);
-                } else {
-                    gameScreenMode = 'start';
                 }
+                if (gameScreenMode == 'loadingterraingen') {
+                    terrainData = Object.keys(gameData['terrainData']);
+                    prevoiusGroundLevel = 0;
+                    try {
+                        blockHeightsForMaxCoord = gameData['terrainData'];
+                        blockHeightsForMaxCoord = Object.keys(blockHeightsForMaxCoord);
+                        tmpList1 = [];
+                        for (key = 0;key < blockHeightsForMaxCoord.length;key++) {
+                            tmpList1.push(parseInt(blockHeightsForMaxCoord[key]));
+                        }
+                        blockHeightsForMaxCoord = Math.max.apply(null, tmpList1);
+                        columnData = Object.keys(gameData['terrainData'][blockHeightsForMaxCoord]['blockData']);
+                        tmpList2 = [];
+                        for (key = 0;key < columnData.length;key++) {
+                            tmpList2.push(parseInt(columnData[key]));
+                        }
+                        prevoiusGroundLevel = Math.max.apply(null, tmpList2);
+                    } catch (e) {
+                        prevoiusGroundLevel = 0;
+                    }
+                    gameData['terrainData'] = generateTerrainChunk(
+                        terrainGenProgress, //minXCoord
+                        terrainGenProgress + 2, //maxXCoord
+                        gameData['boundaryData']['yTopBoundary'], //maxHeight 
+                        gameData['boundaryData']['yBottomBoundary'], //minHeight
+                        gameData['boundaryData']['xLeftBoundary'], //worldXMinBorder
+                        gameData['boundaryData']['xRightBoundary'], //worldXMaxBorder
+                        prevoiusGroundLevel, //prevoiusGroundLevel
+                        gameData['terrainData'], //previousTerrainData
+                        gameData['boundaryData']['generationMaxHeight'], //maxMountainHeight 
+                        gameData['boundaryData']['generationMinHeight'] //minValleyDepth
+                    );
+                    previousFillStyle = ctx.fillStyle;
+                    ctx.fillStyle = '#5c5c5c';
+                    loadingScreenBarSize = [canvas.width / 2, canvas.height / 15];
+                    rectCoords = [0, 0, 0, 0];
+                    rectCoords[0] = ((canvas.width - loadingScreenBarSize[0]) / 2)
+                    rectCoords[1] = ((canvas.height - loadingScreenBarSize[1]) / 2)
+                    rectCoords[2] = loadingScreenBarSize[0];
+                    rectCoords[3] = loadingScreenBarSize[1];
+                    ctx.fillRect(rectCoords[0], rectCoords[1], rectCoords[2], rectCoords[3]);
+                    innerRectCoords = [rectCoords[0] + 10, rectCoords[1] + 10, ((rectCoords[2] - 20) * (terrainGenProgress / gameData['boundaryData']['xRightBoundary'])), rectCoords[3] - 20];
+                    ctx.fillStyle = 'black'
+                    ctx.fillRect(innerRectCoords[0], innerRectCoords[1], innerRectCoords[2], innerRectCoords[3]);
+                    ctx.fillStyle = 'white';
+                    ctx.font = String(loadingScreenBarSize[1] / 3) + 'px __local__pixelsplitter__';
+                    ctx.fillText(('Loading game...(' + String(terrainGenProgress) + '/' + String(gameData['boundaryData']['xRightBoundary']) + ')'), innerRectCoords[0], innerRectCoords[1] + (loadingScreenBarSize[1] / 3));
+                    ctx.fillStyle = previousFillStyle;
+                    terrainGenProgress++;
+                    if (terrainGenProgress >= gameData['boundaryData']['xRightBoundary']) {
+                        gameScreenMode = 'ingame';
+                    }
+                }
+                endTime = performance.now();
+                lastFps = (endTime - startTime) / 1000;
                 //running = false;
                 if (running) {
                     window.requestAnimationFrame(drawLoop);
