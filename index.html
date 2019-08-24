@@ -37,6 +37,7 @@
         <img src = './utils/ingame-images/grass-block.png' id = 'sprites.grassblocksprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
         <img src = './utils/ingame-images/stone-block.png' id = 'sprites.stoneblocksprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
         <img src = './utils/ingame-images/grass-overlay.png' id = 'sprites.grassoverlaysprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
+        <img src = './utils/ingame-images/grass-overlay-2.png' id = 'sprites.grassoverlaysprite2' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
         <img src = './utils/ingame-images/crosshair.png' id = 'sprites.crosshair' class = 'hiddenImage'/>
         <img src = './utils/ingame-images/tree-sprite.png' id = 'sprites.treesprite1' class = 'daylightAffectedSprite hiddenImage'/>
         <img src = './utils/ingame-images/shrubbery-overlay.png' id = 'sprites.shrubberyoverlaysprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
@@ -45,6 +46,10 @@
         <img src = './utils/ingame-images/inventory-slot-background.png' id = 'sprites.inventoryslotbg' class = 'hiddenImage'/>
         <img src = './utils/ingame-images/inventory-slot-selection-indicator.png' id = 'sprites.inventoryslotselected' class = 'hiddenImage'/>
         <img src = './utils/ingame-images/cloud1.png' id = 'sprites.cloud1' class = 'daylightAffectedSprite hiddenImage'/>
+        <img src = './utils/ingame-images/cloud2.png' id = 'sprites.cloud2' class = 'daylightAffectedSprite hiddenImage'/>
+        <img src = './utils/ingame-images/sun.png' id = 'sprites.sun' class = 'daylightAffectedSprite hiddenImage'/>
+        <img src = './utils/ingame-images/berry-bush.png' id = 'sprites.berrybushsprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
+        <img src = './utils/ingame-images/berry-bush-2.png' id = 'sprites.berrybush2sprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
         <canvas id = 'gamecanvas'><p>Error showing canvas.</p></canvas>
         <script>
             console.log('Press the "[" button to toggle the debug overlay.')
@@ -159,14 +164,22 @@
                                 individualBlockData['isSolid'] = isSolidBlock;
                                 rowData['blockData'][yCoord] = individualBlockData;
                             } else {
-                                if (distanceFromGroundLevel == -1 && getRandomInt(0, 3) == 1) {
-                                    blockType = 'grassoverlay';
+                                if (distanceFromGroundLevel == -1 && getRandomInt(0, 2) == 1) {
+                                    grassTypes = ['grassoverlay', 'grassoverlay2'];
+                                    blockType = grassTypes[getRandomInt(0, grassTypes.length - 1)];
                                     isSolidBlock = false;
                                     individualBlockData['blockType'] = blockType;
                                     individualBlockData['isSolid'] = isSolidBlock;
                                     rowData['blockData'][yCoord] = individualBlockData;
-                                } else if (distanceFromGroundLevel == -1 && getRandomInt(0, 6) == 1) {
+                                } else if (distanceFromGroundLevel == -1 && getRandomInt(0, 8) == 1) {
                                     blockType = 'shrubbery';
+                                    isSolidBlock = false;
+                                    individualBlockData['blockType'] = blockType;
+                                    individualBlockData['isSolid'] = isSolidBlock;
+                                    rowData['blockData'][yCoord] = individualBlockData;
+                                } else if (distanceFromGroundLevel == -1 && getRandomInt(0, 4) == 1) {
+                                    berryBushTypes = ['berrybush', 'berrybush2'];
+                                    blockType = berryBushTypes[getRandomInt(0, berryBushTypes.length - 1)];
                                     isSolidBlock = false;
                                     individualBlockData['blockType'] = blockType;
                                     individualBlockData['isSolid'] = isSolidBlock;
@@ -187,7 +200,7 @@
             }
             function generateNewClouds(amount) {
                 var clouds = [];
-                var cloudTypes = ['cloud1'];
+                var cloudTypes = ['cloud1', 'cloud2'];
                 for (i = 0;i < amount;i++) {
                     var sizeModifier = getRandomInt(1, 3)
                     var cloudData = {
@@ -223,13 +236,18 @@
                 'grassblock':document.getElementById('sprites.grassblocksprite'),
                 'stoneblock':document.getElementById('sprites.stoneblocksprite'),
                 'grassoverlay':document.getElementById('sprites.grassoverlaysprite'),
+                'grassoverlay2':document.getElementById('sprites.grassoverlaysprite2'),
                 'crosshair':document.getElementById('sprites.crosshair'),
                 'tree1':document.getElementById('sprites.treesprite1'),
                 'shrubbery':document.getElementById('sprites.shrubberyoverlaysprite'),
                 'selectionindicator':document.getElementById('sprites.crosshairselectionindicator'),
                 'inventoryslot':document.getElementById('sprites.inventoryslotbg'),
                 'inventoryslotselected':document.getElementById('sprites.inventoryslotselected'),
-                'cloud1':document.getElementById('sprites.cloud1')
+                'cloud1':document.getElementById('sprites.cloud1'),
+                'cloud2':document.getElementById('sprites.cloud2'),
+                'sun':document.getElementById('sprites.sun'),
+                'berrybush':document.getElementById('sprites.berrybushsprite'),
+                'berrybush2':document.getElementById('sprites.berrybush2sprite')
             };
             var startScreenAssets = {
                 'startscreenbg':{
@@ -311,11 +329,12 @@
                         gameData['terrainData'] = generateTerrainChunk(Math.floor(gameData['playerData']['position'][0]), Math.floor(gameData['playerData']['position'][0]) + maxAmountOfBlocksOnXAxis, gameData['boundaryData']['yTopBoundary'], gameData['boundaryData']['yBottomBoundary'], gameData['boundaryData']['xLeftBoundary'], gameData['boundaryData']['xRightBoundary'], prevoiusGroundLevel, gameData['terrainData'], gameData['boundaryData']['generationMaxHeight'], gameData['boundaryData']['generationMinHeight']);
                     } 
                     //ABOVE HERE IS A MESS - IM SORRY IF YOU ARE THE ONE WHO WAS CALLED TO REWRITE IT
+                    //ctx.drawImage(sprites['sun'], canvas.width - (canvas.width / 10) - ((gameData['playerData']['position'][0] / gameData['boundaryData']['xRightBoundary']) * canvas.width), canvas.height / 5, blockSizeInPixels * 3, blockSizeInPixels * 3);
                     for (cloud = 0;cloud < clouds.length;cloud++) {
                         cloudData = clouds[cloud];
                         previousGlobalAlpha = ctx.globalAlpha;
                         ctx.globalAlpha = cloudData['opacity'];
-                        offsetX = (gameData['playerData']['position'][0] / gameData['boundaryData']['xRightBoundary']) * canvas.width
+                        offsetX = (gameData['playerData']['position'][0] / gameData['boundaryData']['xRightBoundary']) * canvas.width;
                         if (offsetX == Infinity || offsetX == -Infinity || offsetX == NaN) {
                             offsetX = 0;
                         }
