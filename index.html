@@ -16,6 +16,7 @@
         R: Reset the player to the coordinates [0,0]
         [: Toggle the text debug
         ]: Toggle the grid line debug
+        \: Toggle screenshot mode
         ESC: Toggle menu
         UP-ARROW: Move up in menu
         DN-ARROW: Move down in menu
@@ -149,6 +150,13 @@
                         gameScreenMode = 'menu:0';
                     } else {
                         gameScreenMode = 'ingame';
+                    }
+                }
+                if (keyCode == 220 && gameScreenMode != 'loadingterraingen') {
+                    if (gameScreenMode == 'screenshotmode') {
+                        gameScreenMode = 'ingame';
+                    } else {
+                        gameScreenMode = 'screenshotmode';
                     }
                 }
             }
@@ -313,6 +321,7 @@
                             'R: Reset the player\'s position',
                             '[: Toggle text debug',
                             ']: Toggle grid debug',
+                            '\\: Toggle screenshot mode',
                             'ESC: Toggle menu',
                             'UP-ARROW: Move up in the menu',
                             'DOWN-ARROW: Move down in the menu'
