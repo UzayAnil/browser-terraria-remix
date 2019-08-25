@@ -34,7 +34,7 @@
             .nocursor{cursor:none;}
         </style>
     </head>
-    <body onkeydown = 'handleKeyDown(event.keyCode);' oncontextmenu = 'return false;' class = 'nocursor'>
+    <body onkeydown = 'handleKeyDown(event.keyCode);' oncontextmenu = 'handleCursorEvent("right");return false;' class = 'nocursor' onclick = 'handleCursorEvent("left");'>
         <img src = './utils/ingame-images/character-sprite.png' id = 'sprites.charactersprite' class = 'daylightAffectedSprite gameCharacterSprite hiddenImage'/>
         <img src = './utils/ingame-images/dirt-block.png' id = 'sprites.dirtblocksprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
         <img src = './utils/ingame-images/error-block.png' id = 'sprites.errorblocksprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
@@ -54,9 +54,18 @@
         <img src = './utils/ingame-images/sun.png' id = 'sprites.sun' class = 'daylightAffectedSprite hiddenImage'/>
         <img src = './utils/ingame-images/berry-bush.png' id = 'sprites.berrybushsprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
         <img src = './utils/ingame-images/berry-bush-2.png' id = 'sprites.berrybush2sprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
+        <img src = './utils/ingame-images/controls-button.png' id = 'sprites.controlsbutton' class = 'hiddenImage'/>
+        <img src = './utils/ingame-images/credits-button.png' id = 'sprites.creditsbutton' class = 'hiddenImage'/>
         <canvas id = 'gamecanvas'><p>Error showing canvas.</p></canvas>
         <script>
             console.log('Press the "[" button to toggle the debug overlay.')
+            function handleCursorEvent (button) {
+                cursorEventHandled = {
+                    'handled':false,
+                    'position':mouseCoords,
+                    'button':button
+                }
+            }
             function getRandomInt(min, max) {
                 return Math.floor(Math.random() * (max - min + 1) + min);
             }
@@ -117,8 +126,25 @@
                     } else if (keyCode == 82) {
                         gameData['playerData']['position'] = [0, 0];
                     }
-                } else if (gameScreenMode == 'start') {
-                    if (keyCode == startScreenAssets['startscreenbg']['keypresstostart']['keyCode']) {
+                } else if (gameScreenMode.split(':')[0] == 'menu') {
+                    currentMenuSelected = parseInt(gameScreenMode.split(':')[1]);
+                    if (keyCode == 38) {
+                        currentMenuSelected -= 1;
+                    } else if (keyCode == 40) {
+                        currentMenuSelected += 1;
+                    }
+                    if (currentMenuSelected > menuData['menuItems'].length - 1) {
+                        currentMenuSelected = 0;
+                    } else if (currentMenuSelected < 0) {
+                        currentMenuSelected = menuData['menuItems'].length - 1;
+                    }
+                    menuData['currentSelectedMenuButton'] = currentMenuSelected;
+                    gameScreenMode = 'menu:' + String(menuData['currentSelectedMenuButton'])
+                }
+                if (keyCode == 27 && gameScreenMode != 'loadingterraingen') {
+                    if (gameScreenMode.split(':')[0] != 'menu') {
+                        gameScreenMode = 'menu:0';
+                    } else {
                         gameScreenMode = 'ingame';
                     }
                 }
@@ -224,6 +250,11 @@
                     'minDarkness':0.95,
                 }
             };
+            var cursorEventHandled = {
+                'handled':null,
+                'position':[NaN, NaN],
+                'button':'none'
+            };
             var showInventoryOnScreen = true;
             var showCrosshairOnScreen = true;
             var showCharactersOnScreen = true;
@@ -252,7 +283,9 @@
                 'cloud2':document.getElementById('sprites.cloud2'),
                 'sun':document.getElementById('sprites.sun'),
                 'berrybush':document.getElementById('sprites.berrybushsprite'),
-                'berrybush2':document.getElementById('sprites.berrybush2sprite')
+                'berrybush2':document.getElementById('sprites.berrybush2sprite'),
+                'controlsbutton':document.getElementById('sprites.controlsbutton'),
+                'creditsbutton':document.getElementById('sprites.creditsbutton')
             };
             var startScreenAssets = {
                 'startscreenbg':{
@@ -262,6 +295,19 @@
                         'keyCode':83
                     }
                 }
+            };
+            var menuData = {
+                'menuItems':['controls', 'credits'],
+                'menuItemData':{
+                    'controls':{
+                        'spriteData':'controlsbutton'
+                    },
+                    'credits':{
+                        'spriteData':'creditsbutton'
+                    }
+                },
+                'currentSelectedMenuButton':0,
+                'menuButtonSize':[300, 100]
             };
             var canvasBGColor = 'rgba(0, 0, 0, 1)';
             var blockSizeInPixels = 40;
@@ -469,7 +515,7 @@
                     }
                     gameData['terrainData'] = generateTerrainChunk(
                         terrainGenProgress, //minXCoord
-                        terrainGenProgress + 2, //maxXCoord
+                        terrainGenProgress + 5, //maxXCoord
                         gameData['boundaryData']['yTopBoundary'], //maxHeight 
                         gameData['boundaryData']['yBottomBoundary'], //minHeight
                         gameData['boundaryData']['xLeftBoundary'], //worldXMinBorder
@@ -499,6 +545,21 @@
                     if (terrainGenProgress >= gameData['boundaryData']['xRightBoundary']) {
                         gameScreenMode = 'ingame';
                     }
+                } else if (gameScreenMode.split(':')[0] == 'menu') {
+                    previousFillStyle = ctx.fillStyle;
+                    ctx.fillStyle = 'rgba(114, 114, 114, 0.5)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    menuData['currentSelectedMenuButton'] = parseInt(gameScreenMode.split(':')[1]);
+                    for (menuButton = 0;menuButton < menuData['menuItems'].length;menuButton++) {
+                        menuButtonSpritePath = sprites[menuData['menuItemData'][menuData['menuItems'][menuButton]]['spriteData']];
+                        menuButtonSize = menuData['menuButtonSize'];
+                        ctx.drawImage(menuButtonSpritePath, 100, 100 + ((menuButtonSize[1] + 10) * menuButton), menuButtonSize[0], menuButtonSize[1]);
+                        if (menuButton == menuData['currentSelectedMenuButton']) {
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+                            ctx.fillRect(100, 100 + ((menuButtonSize[1] + 10) * menuButton), menuButtonSize[0], menuButtonSize[1]);
+                        }
+                    }
+                    ctx.fillStyle = previousFillStyle;
                 }
                 endTime = performance.now();
                 lastFps = (endTime - startTime) / 1000;
