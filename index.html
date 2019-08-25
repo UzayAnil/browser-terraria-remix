@@ -7,7 +7,6 @@
         [ ] Add a credit screen.
         [ ] Add caves.
         [ ] Fix the gravity.
-        [ ] Make a loading screen where it loads the entire world and has a progress bar.
 -->
 <!--
     CONTROLS:
@@ -303,10 +302,25 @@
                 'menuItems':['controls', 'credits'],
                 'menuItemData':{
                     'controls':{
-                        'spriteData':'controlsbutton'
+                        'spriteData':'controlsbutton',
+                        'panelInfo':[
+                            'W: Jump',
+                            'A: Move left',
+                            'D: Move right',
+                            'R: Reset the player\'s position',
+                            '[: Toggle text debug',
+                            ']: Toggle grid debug',
+                            'ESC: Toggle menu',
+                            'UP-ARROW: Move up in the menu',
+                            'DOWN-ARROW: Move down in the menu'
+                        ]
                     },
                     'credits':{
-                        'spriteData':'creditsbutton'
+                        'spriteData':'creditsbutton',
+                        'panelInfo':[
+                            'Textures/Sprites made by Toshi',
+                            'Game programmed by Katznboyz'
+                        ]
                     }
                 },
                 'currentSelectedMenuButton':0,
@@ -550,9 +564,12 @@
                     }
                 } else if (gameScreenMode.split(':')[0] == 'menu') {
                     previousFillStyle = ctx.fillStyle;
-                    ctx.fillStyle = 'rgba(114, 114, 114, 0.5)';
+                    ctx.fillStyle = 'rgba(114, 114, 114, 0.9)';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     menuData['currentSelectedMenuButton'] = parseInt(gameScreenMode.split(':')[1]);
+                    ctx.fillStyle = '#274e2C';
+                    ctx.font = '20px __local__pixelsplitter__';
+                    ctx.fillText('Use the up and down arrow keys to navigate the menu.', 0, 20);
                     for (menuButton = 0;menuButton < menuData['menuItems'].length;menuButton++) {
                         menuButtonSpritePath = sprites[menuData['menuItemData'][menuData['menuItems'][menuButton]]['spriteData']];
                         menuButtonSize = menuData['menuButtonSize'];
@@ -560,6 +577,16 @@
                         if (menuButton == menuData['currentSelectedMenuButton']) {
                             ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
                             ctx.fillRect(100, 100 + ((menuButtonSize[1] + 10) * menuButton), menuButtonSize[0], menuButtonSize[1]);
+                            menuPanelInfo = menuData['menuItemData'][menuData['menuItems'][menuButton]]['panelInfo']
+                            ctx.fillStyle = '#274e2C';
+                            fontSize = (canvas.height - 100) / menuPanelInfo.length;
+                            if (fontSize > 30) {
+                                fontSize = 30;
+                            }
+                            ctx.font = String(fontSize) + 'px __local__pixelsplitter__';
+                            for (line = 0;line < menuPanelInfo.length;line++) {
+                                ctx.fillText(String(menuPanelInfo[line]), 100 + menuButtonSize[0] + 100, ((line + 1) * fontSize) + 100);
+                            }
                         }
                     }
                     ctx.fillStyle = previousFillStyle;
