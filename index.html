@@ -105,9 +105,9 @@
                 if (gameScreenMode == 'ingame') {
                     isTouchingBlock = getIsTouchingBlock();
                     if (keyCode == 68) {
-                        gameData['playerData']['position'][0] += 0.5;
+                        gameData['playerData']['position'][0] += 1;
                     } else if (keyCode == 65) {
-                        gameData['playerData']['position'][0] -= 0.5;
+                        gameData['playerData']['position'][0] -= 1;
                     } else if (keyCode == 87 && isTouchingBlock) {
                         gameData['playerData']['position'][1] += 2;
                     } else if (keyCode == 219) {
