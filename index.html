@@ -46,6 +46,7 @@
         <img src = './utils/ingame-images/grass-overlay-2.png' id = 'sprites.grassoverlaysprite2' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
         <img src = './utils/ingame-images/crosshair.png' id = 'sprites.crosshair' class = 'hiddenImage'/>
         <img src = './utils/ingame-images/tree-sprite.png' id = 'sprites.treesprite1' class = 'daylightAffectedSprite hiddenImage'/>
+        <img src = './utils/ingame-images/tree-sprite2.png' id = 'sprites.treesprite2' class = 'daylightAffectedSprite hiddenImage'/>
         <img src = './utils/ingame-images/shrubbery-overlay.png' id = 'sprites.shrubberyoverlaysprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
         <img src = './utils/ingame-images/startscreen-art.png' id = 'sprites.startscreenart' class = 'hiddenImage'/>
         <img src = './utils/ingame-images/crosshair-block-selection-outline.png' id = 'sprites.crosshairselectionindicator' class = 'hiddenImage'/>
@@ -217,7 +218,8 @@
                                     individualBlockData['isSolid'] = isSolidBlock;
                                     rowData['blockData'][yCoord] = individualBlockData;
                                 } else if (distanceFromGroundLevel == -1 && getRandomInt(0, 6) == 1) {
-                                    blockType = 'tree1';
+                                    treeTypes = ['tree1', 'tree2'];
+                                    blockType = treeTypes[getRandomInt(0, treeTypes.length - 1)];
                                     isSolidBlock = false;
                                     individualBlockData['blockType'] = blockType;
                                     individualBlockData['isSolid'] = isSolidBlock;
@@ -277,6 +279,7 @@
                 'grassoverlay2':document.getElementById('sprites.grassoverlaysprite2'),
                 'crosshair':document.getElementById('sprites.crosshair'),
                 'tree1':document.getElementById('sprites.treesprite1'),
+                'tree2':document.getElementById('sprites.treesprite2'),
                 'shrubbery':document.getElementById('sprites.shrubberyoverlaysprite'),
                 'selectionindicator':document.getElementById('sprites.crosshairselectionindicator'),
                 'inventoryslot':document.getElementById('sprites.inventoryslotbg'),
@@ -404,7 +407,7 @@
                                 blockYCoord = (centerYCoord - (YCoord * blockSizeInPixels)) + (gameData['playerData']['position'][1] * blockSizeInPixels);
                                 if (blockYCoord < maxAmountOfBlocksOnYAxis * blockSizeInPixels) {
                                     spriteName = sprites[individualData];
-                                    if (spriteName == sprites['tree1']) {
+                                    if (spriteName == sprites['tree1'] || spriteName == sprites['tree2']) {
                                         ctx.drawImage(spriteName, (((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0]) - blockSizeInPixels, blockYCoord - (blockSizeInPixels * 3), (blockSizeInPixels * 3), (blockSizeInPixels * 4));
                                     } else {
                                         ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels, blockSizeInPixels);
