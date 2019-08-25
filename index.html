@@ -541,6 +541,16 @@
                                 inventory['items'][Object.keys(inventory['items'])[inventory['selectedSlot']]] -= 1;
                             }
                         }
+                        if (cursorEventHandled['button'] == 'right') {
+                            try {
+                                inventory['items'][gameData['terrainData'][positionOnMap[0]]['blockData'][String(positionOnMap[1])]['blockType']] += 1;
+                                if (isNaN(inventory['items'][gameData['terrainData'][positionOnMap[0]]['blockData'][String(positionOnMap[1])]['blockType']])) {
+                                    inventory['items'][gameData['terrainData'][positionOnMap[0]]['blockData'][String(positionOnMap[1])]['blockType']] = 1;
+                                }
+                                delete gameData['terrainData'][positionOnMap[0]]['blockData'][String(positionOnMap[1])]
+                            } catch (e) {
+                            }
+                        }
                         cursorEventHandled['handled'] = true;
                     }
                 } else if (gameScreenMode == 'loadingterraingen') {
