@@ -8,19 +8,6 @@
         [ ] Add caves.
         [ ] Fix the gravity.
 -->
-<!--
-    CONTROLS:
-        W: Jump
-        A: Move left
-        D: Move right
-        R: Reset the player to the coordinates [0,0]
-        [: Toggle the text debug
-        ]: Toggle the grid line debug
-        \: Toggle screenshot mode
-        ESC: Toggle menu
-        UP-ARROW: Move up in menu
-        DN-ARROW: Move down in menu
--->
 <!DOCTYPE HTML>
 <html lang = 'en'>
     <head>
@@ -129,6 +116,16 @@
                         gridDebugMode = !gridDebugMode;
                     } else if (keyCode == 82) {
                         gameData['playerData']['position'] = [0, 0];
+                    } else if (keyCode == 69) {
+                        inventory['selectedSlot'] -= 1;
+                        if (inventory['selectedSlot'] < 0) {
+                            inventory['selectedSlot'] = 0;
+                        }
+                    } else if (keyCode == 81) {
+                        inventory['selectedSlot'] += 1;
+                        if (inventory['selectedSlot'] > Object.keys(inventory['items']).length - 1) {
+                            inventory['selectedSlot'] = Object.keys(inventory['items']).length - 1;
+                        }
                     }
                 } else if (gameScreenMode.split(':')[0] == 'menu') {
                     currentMenuSelected = parseInt(gameScreenMode.split(':')[1]);
@@ -353,7 +350,7 @@
                     'position':[0, 0]
                 }, 'boundaryData':{
                     'xLeftBoundary':0,
-                    'xRightBoundary':500,
+                    'xRightBoundary':50,
                     'yTopBoundary':30,
                     'yBottomBoundary':-50,
                     'generationMinHeight':-20,
@@ -363,6 +360,8 @@
             gameData['playerData']['position'][0] = Math.floor(gameData['boundaryData']['xRightBoundary'] / 2);
             var inventory = {
                 'items':{
+                    'stoneblock':10,
+                    'dirtblock':10
                 },
                 'selectedSlot':0
             };
@@ -496,6 +495,9 @@
                     for (slot = 0;slot < inventoryKeys.length;slot++) {
                         ctx.drawImage(sprites['inventoryslot'], canvas.width - (inventorySlotSize * (slot + 2)), inventorySlotSize, inventorySlotSize, inventorySlotSize);
                         ctx.drawImage(sprites[inventoryKeys[slot]], canvas.width - (inventorySlotSize * (slot + 2)) + ((inventorySlotSize / 100) * 16), inventorySlotSize + ((inventorySlotSize / 100) * 16), inventorySlotSize / 1.5, inventorySlotSize / 1.5);
+                        if (slot == inventory['selectedSlot']) {
+                            ctx.drawImage(sprites['inventoryslotselected'], canvas.width - (inventorySlotSize * (slot + 2)), inventorySlotSize, inventorySlotSize, inventorySlotSize);
+                        }
                         ctx.fillStyle = 'white';
                         ctx.font = String((blockSizeInPixels / 3)) + 'px __local__pixelsplitter__';
                         ctx.fillText(String(inventory['items'][inventoryKeys[slot]]), canvas.width - (inventorySlotSize * (slot + 2)), inventorySlotSize + (blockSizeInPixels / 3))
@@ -524,8 +526,24 @@
                     }
                     gameData['playerData']['position'][0] += gameData['playerData']['velocities']['x'];
                     gameData['playerData']['position'][1] += gameData['playerData']['velocities']['y'];
-                }
-                if (gameScreenMode == 'loadingterraingen') {
+                    if (cursorEventHandled['handled'] == false) {
+                        position = cursorEventHandled['position'];
+                        positionOnMap = [position[0], position[1]];
+                        positionOnMap[0] = Math.floor(positionOnMap[0] / blockSizeInPixels) + Math.ceil(gameData['playerData']['position'][0]) - Math.ceil(maxAmountOfBlocksOnXAxis / 2);
+                        positionOnMap[1] = Math.floor(positionOnMap[1] / blockSizeInPixels) - Math.floor(gameData['playerData']['position'][1]) - Math.floor(maxAmountOfBlocksOnYAxis / 2);
+                        positionOnMap[1] = -positionOnMap[1];
+                        if (cursorEventHandled['button'] == 'left') {
+                            if (positionOnMap[0] >= gameData['boundaryData']['xLeftBoundary'] && positionOnMap[0] <= gameData['boundaryData']['xRightBoundary'] && inventory['items'][Object.keys(inventory['items'])[inventory['selectedSlot']]] > 0) {
+                                gameData['terrainData'][positionOnMap[0]]['blockData'][String(positionOnMap[1])] = {
+                                    'blockType':Object.keys(inventory['items'])[inventory['selectedSlot']],
+                                    'isSolid':true
+                                };
+                                inventory['items'][Object.keys(inventory['items'])[inventory['selectedSlot']]] -= 1;
+                            }
+                        }
+                        cursorEventHandled['handled'] = true;
+                    }
+                } else if (gameScreenMode == 'loadingterraingen') {
                     terrainData = Object.keys(gameData['terrainData']);
                     prevoiusGroundLevel = 0;
                     try {
