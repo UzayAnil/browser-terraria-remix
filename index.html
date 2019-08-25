@@ -462,7 +462,10 @@
                 if (showCharactersOnScreen) {
                     characterSpriteXCoord = (maxAmountOfBlocksOnXAxis / 2) * blockSizeInPixels;
                     characterSpriteYCoord = (Math.floor(maxAmountOfBlocksOnYAxis / 2) - 2) * blockSizeInPixels;
-                    ctx.drawImage(sprites['character'], characterSpriteXCoord, characterSpriteYCoord, blockSizeInPixels, blockSizeInPixels * 2);
+                    characterSpriteXOffset = blockSizeInPixels * 0.125;
+                    characterSpriteYOffset = (blockSizeInPixels * 2) * 0.25;
+                    characterSpriteSize = [blockSizeInPixels * 0.75, (blockSizeInPixels * 2) * 0.75];
+                    ctx.drawImage(sprites['character'], characterSpriteXCoord + characterSpriteXOffset, characterSpriteYCoord + characterSpriteYOffset, characterSpriteSize[0], characterSpriteSize[1]);
                 }
                 if (infoDebugMode) {
                     debugItems = [
