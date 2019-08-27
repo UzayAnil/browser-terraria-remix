@@ -35,6 +35,7 @@
         <img src = './utils/ingame-images/crosshair.png' id = 'sprites.crosshair' class = 'hiddenImage'/>
         <img src = './utils/ingame-images/tree-sprite.png' id = 'sprites.treesprite1' class = 'daylightAffectedSprite hiddenImage'/>
         <img src = './utils/ingame-images/tree-sprite2.png' id = 'sprites.treesprite2' class = 'daylightAffectedSprite hiddenImage'/>
+        <img src = './utils/ingame-images/apple-tree.png' id = 'sprites.appletree' class = 'daylightAffectedSprite hiddenImage'/>
         <img src = './utils/ingame-images/shrubbery-overlay.png' id = 'sprites.shrubberyoverlaysprite' class = 'daylightAffectedSprite gameBlockSprite hiddenImage'/>
         <img src = './utils/ingame-images/startscreen-art.png' id = 'sprites.startscreenart' class = 'hiddenImage'/>
         <img src = './utils/ingame-images/crosshair-block-selection-outline.png' id = 'sprites.crosshairselectionindicator' class = 'hiddenImage'/>
@@ -223,7 +224,7 @@
                                     individualBlockData['isSolid'] = isSolidBlock;
                                     rowData['blockData'][yCoord] = individualBlockData;
                                 } else if (distanceFromGroundLevel == -1 && getRandomInt(0, 6) == 1) {
-                                    treeTypes = ['tree1', 'tree2'];
+                                    treeTypes = ['tree1', 'tree2', 'appletree'];
                                     blockType = treeTypes[getRandomInt(0, treeTypes.length - 1)];
                                     isSolidBlock = false;
                                     individualBlockData['blockType'] = blockType;
@@ -295,7 +296,8 @@
                 'berrybush':document.getElementById('sprites.berrybushsprite'),
                 'berrybush2':document.getElementById('sprites.berrybush2sprite'),
                 'controlsbutton':document.getElementById('sprites.controlsbutton'),
-                'creditsbutton':document.getElementById('sprites.creditsbutton')
+                'creditsbutton':document.getElementById('sprites.creditsbutton'),
+                'appletree':document.getElementById('sprites.appletree')
             };
             var startScreenAssets = {
                 'startscreenbg':{
@@ -362,8 +364,6 @@
             gameData['playerData']['position'][0] = Math.floor(gameData['boundaryData']['xRightBoundary'] / 2);
             var inventory = {
                 'items':{
-                    'stoneblock':10,
-                    'dirtblock':10
                 },
                 'selectedSlot':0
             };
@@ -417,7 +417,7 @@
                                 blockYCoord = (centerYCoord - (YCoord * blockSizeInPixels)) + (gameData['playerData']['position'][1] * blockSizeInPixels);
                                 if (blockYCoord < maxAmountOfBlocksOnYAxis * blockSizeInPixels) {
                                     spriteName = sprites[individualData];
-                                    if (spriteName == sprites['tree1'] || spriteName == sprites['tree2']) {
+                                    if (spriteName == sprites['tree1'] || spriteName == sprites['tree2'] || spriteName == sprites['appletree']) {
                                         ctx.drawImage(spriteName, (((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0]) - blockSizeInPixels, blockYCoord - (blockSizeInPixels * 3), (blockSizeInPixels * 3), (blockSizeInPixels * 4));
                                     } else {
                                         ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels, blockSizeInPixels);
