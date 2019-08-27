@@ -452,7 +452,7 @@
                         ctx.moveTo((blockX + characterSpriteXCoord) * blockSizeInPixels, 0);
                         ctx.lineTo((blockX + characterSpriteXCoord) * blockSizeInPixels, screen.height);
                         ctx.stroke();
-                        for (blockY = 0 + positionFloatingPointLeftovers[1];blockY <= maxAmountOfBlocksOnYAxis;blockY++) {
+                        for (blockY = 0 + positionFloatingPointLeftoversAccurate[1];blockY <= maxAmountOfBlocksOnYAxis;blockY++) {
                             ctx.beginPath();
                             ctx.moveTo(0, (blockY * blockSizeInPixels));
                             ctx.lineTo(screen.width, blockY * blockSizeInPixels);
