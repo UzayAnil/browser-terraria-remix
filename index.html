@@ -106,9 +106,9 @@
                 if (gameScreenMode == 'ingame') {
                     isTouchingBlock = getIsTouchingBlock();
                     if (keyCode == 68) {
-                        gameData['playerData']['position'][0] += 1;
+                        gameData['playerData']['position'][0] += 0.25;
                     } else if (keyCode == 65) {
-                        gameData['playerData']['position'][0] -= 1;
+                        gameData['playerData']['position'][0] -= 0.25;
                     } else if (keyCode == 87 && isTouchingBlock) {
                         gameData['playerData']['position'][1] += 2;
                     } else if (keyCode == 219) {
@@ -404,7 +404,8 @@
                     ctx.drawImage(sprites[cloudData['cloudType']], ((cloudData['position'][0] / 100) * canvas.width) - offsetX, ((cloudData['position'][1] / 100) * canvas.height), cloudData['size'][0] * blockSizeInPixels, cloudData['size'][1] * blockSizeInPixels);
                     ctx.globalAlpha = previousGlobalAlpha;
                 }
-                positionFloatingPointLeftovers = [(gameData['playerData']['position'][0] - Math.floor(gameData['playerData']['position'][0])), (gameData['playerData']['position'][1] - Math.floor(gameData['playerData']['position'][1]))];
+                positionFloatingPointLeftovers = [(1 - (gameData['playerData']['position'][0] - Math.floor(gameData['playerData']['position'][0]))), (1 -(gameData['playerData']['position'][1] - Math.floor(gameData['playerData']['position'][1])))];
+                positionFloatingPointLeftoversAccurate = [(gameData['playerData']['position'][0] - Math.floor(gameData['playerData']['position'][0])), (gameData['playerData']['position'][1] - Math.floor(gameData['playerData']['position'][1]))];
                 characterSpriteXCoord = Math.ceil((maxAmountOfBlocksOnXAxis / 2));
                 for (blockX = -characterSpriteXCoord + positionFloatingPointLeftovers[0] - 1;blockX < maxAmountOfBlocksOnXAxis - characterSpriteXCoord;blockX++) {
                     try {
@@ -418,9 +419,9 @@
                                 if (blockYCoord < maxAmountOfBlocksOnYAxis * blockSizeInPixels) {
                                     spriteName = sprites[individualData];
                                     if (spriteName == sprites['tree1'] || spriteName == sprites['tree2'] || spriteName == sprites['appletree']) {
-                                        ctx.drawImage(spriteName, (((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0]) - blockSizeInPixels, blockYCoord - (blockSizeInPixels * 3), (blockSizeInPixels * 3), (blockSizeInPixels * 4));
+                                        ctx.drawImage(spriteName, (((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftoversAccurate[0]) - blockSizeInPixels, blockYCoord - (blockSizeInPixels * 3), (blockSizeInPixels * 3), (blockSizeInPixels * 4));
                                     } else {
-                                        ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels, blockSizeInPixels);
+                                        ctx.drawImage(spriteName, ((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftoversAccurate[0], blockYCoord, blockSizeInPixels, blockSizeInPixels);
                                         if (shaderMode == 'blocky-depth-shaders-1' && rowData['blockData'][YCoord]['isSolid']) {
                                             distanceFromTopSolidBlock = getMaxBlockYCoordForGivenXCoord(blockX + gameData['playerData']['position'][0]) - YCoord;
                                             previousFillColor = ctx.fillStyle;
@@ -434,7 +435,7 @@
                                             }
                                             blockFillColor = 'rgba(0, 0, 0, ' + String(depthDarkness) + ')'
                                             ctx.fillStyle = blockFillColor;
-                                            ctx.fillRect(((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftovers[0], blockYCoord, blockSizeInPixels, blockSizeInPixels);
+                                            ctx.fillRect(((blockX + characterSpriteXCoord) * blockSizeInPixels) + positionFloatingPointLeftoversAccurate[0], blockYCoord, blockSizeInPixels, blockSizeInPixels);
                                             ctx.fillStyle = previousFillColor;
                                             distanceFromTopSolidBlock++;
                                         }
@@ -486,8 +487,8 @@
                 if (showCrosshairOnScreen) {
                     ctx.drawImage(sprites['crosshair'], mouseCoords[0] - (blockSizeInPixels / 2), mouseCoords[1] - (blockSizeInPixels / 2), blockSizeInPixels, blockSizeInPixels);
                     selectionIndicatorCoords = [
-                        blockSizeInPixels * (Math.floor(mouseCoords[0] / blockSizeInPixels) - positionFloatingPointLeftovers[0]),
-                        blockSizeInPixels * (Math.floor(mouseCoords[1] / blockSizeInPixels) + positionFloatingPointLeftovers[1]),
+                        blockSizeInPixels * (Math.floor(mouseCoords[0] / blockSizeInPixels) - positionFloatingPointLeftoversAccurate[0]),
+                        blockSizeInPixels * (Math.floor(mouseCoords[1] / blockSizeInPixels) + positionFloatingPointLeftoversAccurate[1]),
                     ];
                     ctx.drawImage(sprites['selectionindicator'], selectionIndicatorCoords[0], selectionIndicatorCoords[1], blockSizeInPixels, blockSizeInPixels);
                 }
