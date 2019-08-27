@@ -224,7 +224,7 @@
                                     individualBlockData['isSolid'] = isSolidBlock;
                                     rowData['blockData'][yCoord] = individualBlockData;
                                 } else if (distanceFromGroundLevel == -1 && getRandomInt(0, 6) == 1) {
-                                    treeTypes = ['tree1', 'tree2', 'appletree'];
+                                    treeTypes = ['tree1', 'tree1', 'tree2', 'tree2', 'appletree'];
                                     blockType = treeTypes[getRandomInt(0, treeTypes.length - 1)];
                                     isSolidBlock = false;
                                     individualBlockData['blockType'] = blockType;
